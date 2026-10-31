@@ -1,0 +1,14 @@
+{
+  "name": "rme-terpadu",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Prototipe front-end Rekam Medis Elektronik terpadu: pencarian riwayat medis pasien (HTML, JavaScript, Tailwind CSS).",
+  "scripts": {
+    "dev": "tailwindcss -i ./src/input.css -o ./css/output.css --watch",
+    "build": "tailwindcss -i ./src/input.css -o ./css/output.css --minify"
+  },
+  "devDependencies": {
+    "@tailwindcss/cli": "^4.3.3",
+    "tailwindcss": "^4.3.3"
+  }
+}

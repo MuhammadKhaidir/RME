@@ -1,0 +1,185 @@
+@import "tailwindcss";
+
+/* Kelas Tailwind dipindai dari file berikut (path relatif terhadap file ini) */
+@source "../index.html";
+@source "../js";
+
+/* ------------------------------------------------------------------
+   Token desain. Ubah warna / font di sini, lalu build ulang CSS.
+   ------------------------------------------------------------------ */
+@theme {
+  --font-sans: "IBM Plex Sans", ui-sans-serif, system-ui, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+
+  /* Netral kehijauan: dipakai untuk teks, garis, dan latar */
+  --color-ink-50: #f5f7f6;
+  --color-ink-100: #eaeeed;
+  --color-ink-200: #dce3e1;
+  --color-ink-300: #c2cdca;
+  --color-ink-400: #93a29f;
+  --color-ink-500: #5f706c;
+  --color-ink-600: #485956;
+  --color-ink-700: #34443f;
+  --color-ink-800: #22302d;
+  --color-ink-900: #10201e;
+
+  /* Hijau klinis: warna utama */
+  --color-brand-50: #e8f4f1;
+  --color-brand-100: #cfe8e2;
+  --color-brand-200: #a3d1c7;
+  --color-brand-300: #6fb5a7;
+  --color-brand-400: #3f9686;
+  --color-brand-500: #1f7b6c;
+  --color-brand-600: #0f6657;
+  --color-brand-700: #0c5448;
+  --color-brand-800: #0a4339;
+  --color-brand-900: #08332c;
+}
+
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+  body {
+    font-feature-settings: "tnum" 1, "cv11" 1;
+  }
+  :focus-visible {
+    outline: 2px solid var(--color-brand-500);
+    outline-offset: 2px;
+  }
+  /* Kotak cari utama punya tombol hapus sendiri */
+  #q::-webkit-search-cancel-button {
+    display: none;
+  }
+  mark {
+    background: #fde68a;
+    color: inherit;
+    border-radius: 2px;
+    padding: 0 1px;
+  }
+  dialog {
+    color: inherit;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
+@layer components {
+  /* Tombol */
+  .btn {
+    @apply inline-flex h-9 shrink-0 cursor-pointer items-center justify-center gap-2 rounded-md px-3.5 text-sm font-medium whitespace-nowrap transition-colors disabled:cursor-not-allowed disabled:opacity-50;
+  }
+  .btn-primary {
+    @apply bg-brand-600 text-white hover:bg-brand-700 active:bg-brand-800;
+  }
+  .btn-secondary {
+    @apply border border-ink-300 bg-white text-ink-800 hover:bg-ink-50 active:bg-ink-100;
+  }
+  .btn-quiet {
+    @apply text-ink-700 hover:bg-ink-100 active:bg-ink-200;
+  }
+  .btn-danger {
+    @apply bg-rose-700 text-white hover:bg-rose-800;
+  }
+  .btn-sm {
+    @apply h-8 px-3 text-[13px];
+  }
+  .btn-icon {
+    @apply size-9 px-0;
+  }
+
+  /* Form */
+  .field {
+    @apply block h-9 w-full rounded-md border border-ink-300 bg-white px-3 text-sm text-ink-900 placeholder:text-ink-400 hover:border-ink-400 focus:border-brand-500 focus:outline-2 focus:outline-offset-0 focus:outline-brand-500/30 disabled:bg-ink-100 disabled:text-ink-500;
+  }
+  textarea.field {
+    @apply h-auto min-h-20 py-2 leading-relaxed;
+  }
+  select.field {
+    @apply pr-8;
+  }
+  .field[aria-invalid="true"] {
+    @apply border-rose-600 focus:outline-rose-600/30;
+  }
+  .label {
+    @apply mb-1 block text-sm font-medium text-ink-800;
+  }
+  .hint {
+    @apply mt-1 text-xs text-ink-500;
+  }
+  .err {
+    @apply mt-1 text-xs font-medium text-rose-700;
+  }
+
+  /* Permukaan */
+  .panel {
+    @apply rounded-lg border border-ink-200 bg-white;
+  }
+  .panel-head {
+    @apply flex flex-wrap items-center justify-between gap-x-3 gap-y-1 border-b border-ink-200 px-4 py-3;
+  }
+
+  /* Tabel */
+  .tbl {
+    @apply w-full text-left text-sm;
+  }
+  .tbl th {
+    @apply border-b border-ink-200 bg-ink-50 px-4 py-2.5 text-xs font-medium text-ink-600;
+  }
+  .tbl td {
+    @apply border-b border-ink-100 px-4 py-3 align-middle;
+  }
+  .tbl tbody tr:last-child td {
+    @apply border-b-0;
+  }
+  .tbl tbody tr.row-link {
+    @apply cursor-pointer hover:bg-brand-50/60;
+  }
+
+  /* Lencana status */
+  .badge {
+    @apply inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium whitespace-nowrap;
+  }
+
+  /* Pengenal (No. RM, NIK, kode ICD): lebar tetap agar angka sejajar */
+  .ident {
+    @apply font-mono text-[0.92em] tracking-tight;
+  }
+
+  /* Pita kertas bergaris, dipakai di panel login */
+  .ruled {
+    background-image: repeating-linear-gradient(to bottom, transparent 0, transparent 31px, rgb(255 255 255 / 0.07) 31px, rgb(255 255 255 / 0.07) 32px);
+  }
+
+  /* Timeline riwayat: ringkasan kunjungan tidak memakai penanda bawaan <details> */
+  details.visit > summary {
+    list-style: none;
+  }
+  details.visit > summary::-webkit-details-marker {
+    display: none;
+  }
+  details.visit[open] .chev {
+    transform: rotate(90deg);
+  }
+
+  @media print {
+    body {
+      background: white;
+    }
+  }
+}
