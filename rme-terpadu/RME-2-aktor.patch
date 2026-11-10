@@ -1,0 +1,206 @@
+diff --git a/js/auth.js b/js/auth.js
+--- a/js/auth.js
++++ b/js/auth.js
+@@ -5,6 +5,4 @@
+   const ROLES = {
+-    admin: { label: 'Administrator', desc: 'Mengelola pengguna dan memantau log aktivitas.' },
+-    pendaftaran: { label: 'Petugas Pendaftaran', desc: 'Mendaftarkan pasien dan kunjungan.' },
+-    klinisi: { label: 'Dokter / Perawat', desc: 'Melihat riwayat dan mengisi pemeriksaan.' },
+-    rm: { label: 'Petugas Rekam Medis', desc: 'Menjaga mutu data dan menelusuri riwayat.' },
++    petugas_rme: { label: 'Petugas RME', desc: 'Mengelola akun, data pasien, kunjungan, dan rekam medis.' },
++    tenaga_medis: { label: 'Tenaga Medis', desc: 'Melakukan pemeriksaan, melihat riwayat medis, dan mencetak ringkasan.' },
+   };
+@@ -16,14 +14,14 @@
+   const PERMS = [
+-    { key: 'search', label: 'Mencari riwayat pasien', roles: ['pendaftaran', 'klinisi', 'rm'] },
+-    { key: 'patient.view', label: 'Melihat identitas pasien', roles: ['pendaftaran', 'klinisi', 'rm'] },
+-    { key: 'history.summary', label: 'Melihat ringkasan riwayat (tanggal, layanan, diagnosis utama)', roles: ['pendaftaran', 'klinisi', 'rm'] },
+-    { key: 'history.full', label: 'Melihat rincian klinis (tanda vital, tindakan, terapi)', roles: ['klinisi', 'rm'] },
+-    { key: 'patient.create', label: 'Mendaftarkan pasien baru', roles: ['pendaftaran'] },
+-    { key: 'patient.edit', label: 'Mengubah identitas pasien', roles: ['pendaftaran', 'rm'] },
+-    { key: 'visit.view', label: 'Melihat daftar kunjungan', roles: ['pendaftaran', 'klinisi', 'rm'] },
+-    { key: 'visit.create', label: 'Mendaftarkan kunjungan', roles: ['pendaftaran'] },
+-    { key: 'visit.examine', label: 'Mengisi hasil pemeriksaan', roles: ['klinisi'] },
+-    { key: 'history.print', label: 'Mencetak ringkasan riwayat', roles: ['klinisi', 'rm'] },
+-    { key: 'audit.view', label: 'Melihat log aktivitas', roles: ['admin', 'rm'] },
+-    { key: 'user.manage', label: 'Mengelola pengguna', roles: ['admin'] },
++    { key: 'search', label: 'Mencari riwayat pasien', roles: ['petugas_rme', 'tenaga_medis'] },
++    { key: 'patient.view', label: 'Melihat identitas pasien', roles: ['petugas_rme', 'tenaga_medis'] },
++    { key: 'history.summary', label: 'Melihat ringkasan riwayat (tanggal, layanan, diagnosis utama)', roles: ['petugas_rme', 'tenaga_medis'] },
++    { key: 'history.full', label: 'Melihat rincian klinis (tanda vital, tindakan, terapi)', roles: ['petugas_rme', 'tenaga_medis'] },
++    { key: 'patient.create', label: 'Mendaftarkan pasien baru', roles: ['petugas_rme'] },
++    { key: 'patient.edit', label: 'Mengubah identitas pasien', roles: ['petugas_rme'] },
++    { key: 'visit.view', label: 'Melihat daftar kunjungan', roles: ['petugas_rme', 'tenaga_medis'] },
++    { key: 'visit.create', label: 'Mendaftarkan kunjungan', roles: ['petugas_rme'] },
++    { key: 'visit.examine', label: 'Mengisi hasil pemeriksaan', roles: ['tenaga_medis'] },
++    { key: 'history.print', label: 'Mencetak ringkasan riwayat', roles: ['petugas_rme', 'tenaga_medis'] },
++    { key: 'audit.view', label: 'Melihat log aktivitas', roles: ['petugas_rme'] },
++    { key: 'user.manage', label: 'Mengelola pengguna', roles: ['petugas_rme'] },
+   ];
+diff --git a/js/seed.js b/js/seed.js
+--- a/js/seed.js
++++ b/js/seed.js
+@@ -8,18 +8,18 @@
+ 
+   /* ---------- Pengguna ---------- */
+   const USERS = [
+-    { username: 'admin', password: 'admin123', nama: 'Admin Sistem', role: 'admin' },
+-    { username: 'daftar', password: 'daftar123', nama: 'Nia Anggraini', role: 'pendaftaran' },
+-    { username: 'daftar2', password: 'rme12345', nama: 'Rudi Hartono', role: 'pendaftaran' },
+-    { username: 'dokter', password: 'dokter123', nama: 'dr. Andi Pratama', role: 'klinisi', profesi: 'Dokter', spesialis: 'Poli Umum' },
+-    { username: 'dokter.pd', password: 'rme12345', nama: 'dr. Maya Sari, Sp.PD', role: 'klinisi', profesi: 'Dokter', spesialis: 'Penyakit Dalam' },
+-    { username: 'dokter.anak', password: 'rme12345', nama: 'dr. Hendra Wijaya, Sp.A', role: 'klinisi', profesi: 'Dokter', spesialis: 'Anak' },
+-    { username: 'dokter.jp', password: 'rme12345', nama: 'dr. Lestari Putri, Sp.JP', role: 'klinisi', profesi: 'Dokter', spesialis: 'Jantung' },
+-    { username: 'dokter.paru', password: 'rme12345', nama: 'dr. Bambang Nugroho, Sp.P', role: 'klinisi', profesi: 'Dokter', spesialis: 'Paru' },
+-    { username: 'dokter.saraf', password: 'rme12345', nama: 'dr. Rahma Dewi, Sp.N', role: 'klinisi', profesi: 'Dokter', spesialis: 'Saraf' },
+-    { username: 'dokter.bedah', password: 'rme12345', nama: 'dr. Gilang Saputra, Sp.B', role: 'klinisi', profesi: 'Dokter', spesialis: 'Bedah' },
+-    { username: 'perawat', password: 'perawat123', nama: 'Ns. Siti Aminah', role: 'klinisi', profesi: 'Perawat', spesialis: '' },
+-    { username: 'perawat2', password: 'rme12345', nama: 'Ns. Dedi Kurniawan', role: 'klinisi', profesi: 'Perawat', spesialis: '' },
+-    { username: 'rm', password: 'rm123', nama: 'Wulan Anggraeni', role: 'rm' },
+-    { username: 'rm2', password: 'rme12345', nama: 'Fajar Ramadhan', role: 'rm' },
++    { username: 'admin', password: 'admin123', nama: 'Admin Sistem', role: 'petugas_rme' },
++    { username: 'daftar', password: 'daftar123', nama: 'Nia Anggraini', role: 'petugas_rme' },
++    { username: 'daftar2', password: 'rme12345', nama: 'Rudi Hartono', role: 'petugas_rme' },
++    { username: 'dokter', password: 'dokter123', nama: 'dr. Andi Pratama', role: 'tenaga_medis', profesi: 'Dokter', spesialis: 'Poli Umum' },
++    { username: 'dokter.pd', password: 'rme12345', nama: 'dr. Maya Sari, Sp.PD', role: 'tenaga_medis', profesi: 'Dokter', spesialis: 'Penyakit Dalam' },
++    { username: 'dokter.anak', password: 'rme12345', nama: 'dr. Hendra Wijaya, Sp.A', role: 'tenaga_medis', profesi: 'Dokter', spesialis: 'Anak' },
++    { username: 'dokter.jp', password: 'rme12345', nama: 'dr. Lestari Putri, Sp.JP', role: 'tenaga_medis', profesi: 'Dokter', spesialis: 'Jantung' },
++    { username: 'dokter.paru', password: 'rme12345', nama: 'dr. Bambang Nugroho, Sp.P', role: 'tenaga_medis', profesi: 'Dokter', spesialis: 'Paru' },
++    { username: 'dokter.saraf', password: 'rme12345', nama: 'dr. Rahma Dewi, Sp.N', role: 'tenaga_medis', profesi: 'Dokter', spesialis: 'Saraf' },
++    { username: 'dokter.bedah', password: 'rme12345', nama: 'dr. Gilang Saputra, Sp.B', role: 'tenaga_medis', profesi: 'Dokter', spesialis: 'Bedah' },
++    { username: 'perawat', password: 'perawat123', nama: 'Ns. Siti Aminah', role: 'tenaga_medis', profesi: 'Perawat', spesialis: '' },
++    { username: 'perawat2', password: 'rme12345', nama: 'Ns. Dedi Kurniawan', role: 'tenaga_medis', profesi: 'Perawat', spesialis: '' },
++    { username: 'rm', password: 'rm123', nama: 'Wulan Anggraeni', role: 'petugas_rme' },
++    { username: 'rm2', password: 'rme12345', nama: 'Fajar Ramadhan', role: 'petugas_rme' },
+   ];
+diff --git a/js/store.js b/js/store.js
+--- a/js/store.js
++++ b/js/store.js
+@@ -22,7 +22,29 @@
+   store.init = function () {
+     db = ui.storage.get(App.config.storageKey, null);
+     if (!db || db.version !== 1) {
+       db = App.seed.generate(new Date());
+       persist();
+     }
++
++    // Satukan role lama agar data localStorage pengguna sebelumnya tetap bisa dipakai.
++    const roleMap = {
++      admin: 'petugas_rme',
++      pendaftaran: 'petugas_rme',
++      rm: 'petugas_rme',
++      klinisi: 'tenaga_medis',
++    };
++    let migrated = false;
++    (db.users || []).forEach((u) => {
++      if (roleMap[u.role] && roleMap[u.role] !== u.role) {
++        u.role = roleMap[u.role];
++        migrated = true;
++      }
++    });
++    (db.audit || []).forEach((entry) => {
++      if (roleMap[entry.role] && roleMap[entry.role] !== entry.role) {
++        entry.role = roleMap[entry.role];
++        migrated = true;
++      }
++    });
++    if (migrated) persist();
+   };
+@@ -53,1 +75,1 @@
+-  store.dokter = () => db.users.filter((u) => u.role === 'klinisi' && u.profesi === 'Dokter' && u.aktif);
++  store.dokter = () => db.users.filter((u) => u.role === 'tenaga_medis' && u.profesi === 'Dokter' && u.aktif);
+diff --git a/js/pages/login.js b/js/pages/login.js
+--- a/js/pages/login.js
++++ b/js/pages/login.js
+@@ -7,7 +7,4 @@
+   const DEMO = [
+-    { u: 'dokter', p: 'dokter123', role: 'klinisi', note: 'dr. Andi Pratama, Poli Umum' },
+-    { u: 'daftar', p: 'daftar123', role: 'pendaftaran', note: 'Nia Anggraini' },
+-    { u: 'rm', p: 'rm123', role: 'rm', note: 'Wulan Anggraeni' },
+-    { u: 'perawat', p: 'perawat123', role: 'klinisi', note: 'Ns. Siti Aminah' },
+-    { u: 'admin', p: 'admin123', role: 'admin', note: 'Admin Sistem' },
++    { u: 'admin', p: 'admin123', role: 'petugas_rme', note: 'Admin dan pengelola RME' },
++    { u: 'dokter', p: 'dokter123', role: 'tenaga_medis', note: 'dr. Andi Pratama, Poli Umum' },
+   ];
+@@ -64,1 +61,1 @@
+-                    <span class="min-w-0"><span class="block text-sm font-medium">${ui.esc(App.auth.ROLES[d.role].label)}${d.u === 'perawat' ? ' (perawat)' : d.role === 'klinisi' ? ' (dokter)' : ''}</span><span class="block truncate text-xs text-ink-500">${ui.esc(d.note)}</span></span>
++                    <span class="min-w-0"><span class="block text-sm font-medium">${ui.esc(App.auth.ROLES[d.role].label)}</span><span class="block truncate text-xs text-ink-500">${ui.esc(d.note)}</span></span>
+diff --git a/js/pages/users.js b/js/pages/users.js
+--- a/js/pages/users.js
++++ b/js/pages/users.js
+@@ -1,1 +1,1 @@
+-/* Pengguna dan hak akses (administrator). */
++/* Pengguna dan hak akses (Petugas RME). */
+@@ -22,1 +22,1 @@
+-    const d = u || { nama: '', username: '', role: 'pendaftaran', profesi: 'Dokter', spesialis: 'Poli Umum', aktif: true };
++    const d = u || { nama: '', username: '', role: 'petugas_rme', profesi: 'Dokter', spesialis: 'Poli Umum', aktif: true };
+@@ -61,1 +61,1 @@
+-          <td class="hidden md:table-cell">${u.role === 'klinisi' ? esc(u.profesi + (u.spesialis ? ', ' + u.spesialis : '')) : '<span class="text-ink-400">-</span>'}</td>
++          <td class="hidden md:table-cell">${u.role === 'tenaga_medis' ? esc(u.profesi + (u.spesialis ? ', ' + u.spesialis : '')) : '<span class="text-ink-400">-</span>'}</td>
+@@ -73,1 +73,1 @@
+-          const k = $('u-role').value === 'klinisi';
++          const k = $('u-role').value === 'tenaga_medis';
+@@ -99,3 +99,3 @@
+-          const klinisi = role === 'klinisi';
+-          const profesi = klinisi ? $('u-profesi').value : '';
+-          const data = { nama, username, role, profesi, spesialis: klinisi && profesi === 'Dokter' ? $('u-spes').value : '' };
++          const tenagaMedis = role === 'tenaga_medis';
++          const profesi = tenagaMedis ? $('u-profesi').value : '';
++          const data = { nama, username, role, profesi, spesialis: tenagaMedis && profesi === 'Dokter' ? $('u-spes').value : '' };
+diff --git a/js/pages/dashboard.js b/js/pages/dashboard.js
+--- a/js/pages/dashboard.js
++++ b/js/pages/dashboard.js
+@@ -111,21 +111,20 @@
+   function sidePanels(user, s) {
+     const store = App.store;
+     let html = '';
+-    if (user.role === 'klinisi') {
++    if (user.role === 'tenaga_medis') {
+       const mine = s.todayVisits
+         .filter((v) => v.jenis === 'RJ' && (user.profesi === 'Perawat' || v.dokterId === user.id))
+         .sort((a, b) => (a.tglMasuk < b.tglMasuk ? -1 : 1));
+       const waiting = mine.filter((v) => v.status !== 'Selesai').length;
+       html += `<div class="panel"><div class="panel-head"><h2 class="text-sm font-semibold">${user.profesi === 'Perawat' ? 'Antrean rawat jalan hari ini' : 'Antrean saya hari ini'}</h2><span class="text-xs text-ink-500">${waiting} belum selesai</span></div>
+         ${mine.length ? `<ul class="divide-y divide-ink-100">${mine.map(visitItem).join('')}</ul>` : ui.empty('Belum ada antrean', 'Pasien yang didaftarkan ke poli Anda akan muncul di sini.')}</div>`;
+-    } else if (user.role === 'pendaftaran') {
++    } else if (user.role === 'petugas_rme') {
+       const list = s.todayVisits.slice().sort((a, b) => (a.tglMasuk < b.tglMasuk ? 1 : -1)).slice(0, 8);
+       html += `<div class="panel"><div class="panel-head"><h2 class="text-sm font-semibold">Pendaftaran hari ini</h2><a class="text-xs font-medium text-brand-700 hover:underline" href="#/kunjungan">Lihat semua</a></div>
+         ${list.length ? `<ul class="divide-y divide-ink-100">${list.map(visitItem).join('')}</ul>` : ui.empty('Belum ada pendaftaran hari ini', '', `<a class="btn btn-primary" href="#/kunjungan/baru">Daftarkan kunjungan</a>`)}</div>`;
+-    } else {
+       const logs = store.audit().slice(0, 7);
+       html += `<div class="panel"><div class="panel-head"><h2 class="text-sm font-semibold">Aktivitas terbaru</h2><a class="text-xs font-medium text-brand-700 hover:underline" href="#/log">Lihat log</a></div>
+         <ul class="divide-y divide-ink-100">${logs
+           .map((l) => `<li class="px-4 py-2.5 text-sm"><div class="flex justify-between gap-3"><span class="font-medium">${esc(l.aksi)}</span><span class="shrink-0 text-xs text-ink-500">${ui.fmtTime(l.ts)}</span></div><div class="truncate text-xs text-ink-500">${esc(l.nama)}${l.detail ? ', ' + esc(l.detail) : ''}</div></li>`)
+           .join('')}</ul></div>`;
+     }
+@@ -167,1 +166,1 @@
+-        user.role === 'admin'
++        user.role === 'petugas_rme'
+diff --git a/js/pages/visits.js b/js/pages/visits.js
+--- a/js/pages/visits.js
++++ b/js/pages/visits.js
+@@ -13,1 +13,1 @@
+-      const isDokter = user.role === 'klinisi' && user.profesi === 'Dokter';
++      const isDokter = user.role === 'tenaga_medis' && user.profesi === 'Dokter';
+@@ -40,1 +40,1 @@
+-      const state = { tab: 'today', q: '', jenis: '', status: '', page: 1, mine: user.role === 'klinisi' && user.profesi === 'Dokter' };
++      const state = { tab: 'today', q: '', jenis: '', status: '', page: 1, mine: user.role === 'tenaga_medis' && user.profesi === 'Dokter' };
+diff --git a/js/layout.js b/js/layout.js
+--- a/js/layout.js
++++ b/js/layout.js
+@@ -60,1 +60,1 @@
+-              ${user.role === 'admin' ? `<button class="btn btn-quiet btn-sm" data-reset title="Buat ulang data contoh">${App.icon('rotate-ccw', 'size-4')}<span class="sr-only">Reset data demo</span></button>` : ''}
++              ${user.username === 'admin' ? `<button class="btn btn-quiet btn-sm" data-reset title="Buat ulang data contoh">${App.icon('rotate-ccw', 'size-4')}<span class="sr-only">Reset data demo</span></button>` : ''}
+diff --git a/js/ui.js b/js/ui.js
+--- a/js/ui.js
++++ b/js/ui.js
+@@ -165,6 +165,4 @@
+     const map = {
+-      admin: 'bg-ink-800 text-white',
+-      pendaftaran: 'bg-amber-100 text-amber-900',
+-      klinisi: 'bg-sky-100 text-sky-800',
+-      rm: 'bg-brand-100 text-brand-800',
++      petugas_rme: 'bg-ink-800 text-white',
++      tenaga_medis: 'bg-sky-100 text-sky-800',
+     };
