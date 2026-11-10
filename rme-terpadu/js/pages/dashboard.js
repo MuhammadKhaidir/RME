@@ -111,18 +111,17 @@
   function sidePanels(user, s) {
     const store = App.store;
     let html = '';
-    if (user.role === 'klinisi') {
+    if (user.role === 'tenaga_medis') {
       const mine = s.todayVisits
         .filter((v) => v.jenis === 'RJ' && (user.profesi === 'Perawat' || v.dokterId === user.id))
         .sort((a, b) => (a.tglMasuk < b.tglMasuk ? -1 : 1));
       const waiting = mine.filter((v) => v.status !== 'Selesai').length;
       html += `<div class="panel"><div class="panel-head"><h2 class="text-sm font-semibold">${user.profesi === 'Perawat' ? 'Antrean rawat jalan hari ini' : 'Antrean saya hari ini'}</h2><span class="text-xs text-ink-500">${waiting} belum selesai</span></div>
         ${mine.length ? `<ul class="divide-y divide-ink-100">${mine.map(visitItem).join('')}</ul>` : ui.empty('Belum ada antrean', 'Pasien yang didaftarkan ke poli Anda akan muncul di sini.')}</div>`;
-    } else if (user.role === 'pendaftaran') {
+    } else {
       const list = s.todayVisits.slice().sort((a, b) => (a.tglMasuk < b.tglMasuk ? 1 : -1)).slice(0, 8);
       html += `<div class="panel"><div class="panel-head"><h2 class="text-sm font-semibold">Pendaftaran hari ini</h2><a class="text-xs font-medium text-brand-700 hover:underline" href="#/kunjungan">Lihat semua</a></div>
         ${list.length ? `<ul class="divide-y divide-ink-100">${list.map(visitItem).join('')}</ul>` : ui.empty('Belum ada pendaftaran hari ini', '', `<a class="btn btn-primary" href="#/kunjungan/baru">Daftarkan kunjungan</a>`)}</div>`;
-    } else {
       const logs = store.audit().slice(0, 7);
       html += `<div class="panel"><div class="panel-head"><h2 class="text-sm font-semibold">Aktivitas terbaru</h2><a class="text-xs font-medium text-brand-700 hover:underline" href="#/log">Lihat log</a></div>
         <ul class="divide-y divide-ink-100">${logs
@@ -164,7 +163,7 @@
       const sample = App.store.patients()[5];
 
       const items =
-        user.role === 'admin'
+        user.role === 'petugas_rme'
           ? [
               { label: 'Pengguna aktif', value: App.store.users().filter((u) => u.aktif).length },
               { label: 'Pasien terdaftar', value: s.patients },
@@ -206,7 +205,7 @@
       <section class="mt-6" aria-label="Ringkasan">${kpi(items)}</section>
 
       <div class="mt-6 grid gap-6 lg:grid-cols-[minmax(0,1fr)_23rem]">
-        <div class="space-y-6">${chart(s.days)}${canHistory ? topDiagnoses(s.topDx) : usersByRole()}</div>
+        <div class="space-y-6">${chart(s.days)}${canHistory ? topDiagnoses(s.topDx) : ''}${App.auth.can('user.manage') ? usersByRole() : ''}</div>
         <div class="space-y-6">${sidePanels(user, s)}</div>
       </div>`;
     },

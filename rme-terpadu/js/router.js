@@ -126,7 +126,7 @@
       return `<div class="mx-auto max-w-md py-16 text-center">
         <span class="mx-auto flex size-12 items-center justify-center rounded-full bg-amber-100 text-amber-800">${App.icon('lock', 'size-5')}</span>
         <h1 class="mt-4 text-xl font-semibold">Halaman ini tidak tersedia untuk peran Anda</h1>
-        <p class="mt-2 text-sm text-ink-600">Anda masuk sebagai ${ui.esc(App.auth.ROLES[u.role].label)}. Hak akses tiap peran diatur oleh administrator.</p>
+        <p class="mt-2 text-sm text-ink-600">Anda masuk sebagai ${ui.esc(App.auth.ROLES[u.role].label)}. Hak akses tiap peran diatur oleh Petugas RME.</p>
         <a class="btn btn-primary mt-5" href="#/dashboard">Ke dashboard</a></div>`;
     },
   };

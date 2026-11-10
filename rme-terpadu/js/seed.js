@@ -8,20 +8,20 @@
 
   /* ---------- Pengguna ---------- */
   const USERS = [
-    { username: 'admin', password: 'admin123', nama: 'Admin Sistem', role: 'admin' },
-    { username: 'daftar', password: 'daftar123', nama: 'Nia Anggraini', role: 'pendaftaran' },
-    { username: 'daftar2', password: 'rme12345', nama: 'Rudi Hartono', role: 'pendaftaran' },
-    { username: 'dokter', password: 'dokter123', nama: 'dr. Andi Pratama', role: 'klinisi', profesi: 'Dokter', spesialis: 'Poli Umum' },
-    { username: 'dokter.pd', password: 'rme12345', nama: 'dr. Maya Sari, Sp.PD', role: 'klinisi', profesi: 'Dokter', spesialis: 'Penyakit Dalam' },
-    { username: 'dokter.anak', password: 'rme12345', nama: 'dr. Hendra Wijaya, Sp.A', role: 'klinisi', profesi: 'Dokter', spesialis: 'Anak' },
-    { username: 'dokter.jp', password: 'rme12345', nama: 'dr. Lestari Putri, Sp.JP', role: 'klinisi', profesi: 'Dokter', spesialis: 'Jantung' },
-    { username: 'dokter.paru', password: 'rme12345', nama: 'dr. Bambang Nugroho, Sp.P', role: 'klinisi', profesi: 'Dokter', spesialis: 'Paru' },
-    { username: 'dokter.saraf', password: 'rme12345', nama: 'dr. Rahma Dewi, Sp.N', role: 'klinisi', profesi: 'Dokter', spesialis: 'Saraf' },
-    { username: 'dokter.bedah', password: 'rme12345', nama: 'dr. Gilang Saputra, Sp.B', role: 'klinisi', profesi: 'Dokter', spesialis: 'Bedah' },
-    { username: 'perawat', password: 'perawat123', nama: 'Ns. Siti Aminah', role: 'klinisi', profesi: 'Perawat', spesialis: '' },
-    { username: 'perawat2', password: 'rme12345', nama: 'Ns. Dedi Kurniawan', role: 'klinisi', profesi: 'Perawat', spesialis: '' },
-    { username: 'rm', password: 'rm123', nama: 'Wulan Anggraeni', role: 'rm' },
-    { username: 'rm2', password: 'rme12345', nama: 'Fajar Ramadhan', role: 'rm' },
+    { username: 'admin', password: 'admin123', nama: 'Admin Sistem', role: 'petugas_rme' },
+    { username: 'daftar', password: 'daftar123', nama: 'Nia Anggraini', role: 'petugas_rme' },
+    { username: 'daftar2', password: 'rme12345', nama: 'Rudi Hartono', role: 'petugas_rme' },
+    { username: 'dokter', password: 'dokter123', nama: 'dr. Andi Pratama', role: 'tenaga_medis', profesi: 'Dokter', spesialis: 'Poli Umum' },
+    { username: 'dokter.pd', password: 'rme12345', nama: 'dr. Maya Sari, Sp.PD', role: 'tenaga_medis', profesi: 'Dokter', spesialis: 'Penyakit Dalam' },
+    { username: 'dokter.anak', password: 'rme12345', nama: 'dr. Hendra Wijaya, Sp.A', role: 'tenaga_medis', profesi: 'Dokter', spesialis: 'Anak' },
+    { username: 'dokter.jp', password: 'rme12345', nama: 'dr. Lestari Putri, Sp.JP', role: 'tenaga_medis', profesi: 'Dokter', spesialis: 'Jantung' },
+    { username: 'dokter.paru', password: 'rme12345', nama: 'dr. Bambang Nugroho, Sp.P', role: 'tenaga_medis', profesi: 'Dokter', spesialis: 'Paru' },
+    { username: 'dokter.saraf', password: 'rme12345', nama: 'dr. Rahma Dewi, Sp.N', role: 'tenaga_medis', profesi: 'Dokter', spesialis: 'Saraf' },
+    { username: 'dokter.bedah', password: 'rme12345', nama: 'dr. Gilang Saputra, Sp.B', role: 'tenaga_medis', profesi: 'Dokter', spesialis: 'Bedah' },
+    { username: 'perawat', password: 'perawat123', nama: 'Ns. Siti Aminah', role: 'tenaga_medis', profesi: 'Perawat', spesialis: '' },
+    { username: 'perawat2', password: 'rme12345', nama: 'Ns. Dedi Kurniawan', role: 'tenaga_medis', profesi: 'Perawat', spesialis: '' },
+    { username: 'rm', password: 'rm123', nama: 'Wulan Anggraeni', role: 'petugas_rme' },
+    { username: 'rm2', password: 'rme12345', nama: 'Fajar Ramadhan', role: 'petugas_rme' },
   ];
 
   /* ---------- Template klinis ---------- */

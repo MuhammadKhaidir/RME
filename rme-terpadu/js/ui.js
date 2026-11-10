@@ -163,10 +163,8 @@
   };
   ui.roleBadge = function (role) {
     const map = {
-      admin: 'bg-ink-800 text-white',
-      pendaftaran: 'bg-amber-100 text-amber-900',
-      klinisi: 'bg-sky-100 text-sky-800',
-      rm: 'bg-brand-100 text-brand-800',
+      petugas_rme: 'bg-ink-800 text-white',
+      tenaga_medis: 'bg-sky-100 text-sky-800',
     };
     const r = App.auth.ROLES[role];
     return `<span class="badge ${map[role] || ''}">${ui.esc(r ? r.label : role)}</span>`;

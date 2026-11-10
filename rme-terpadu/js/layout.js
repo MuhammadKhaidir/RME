@@ -57,7 +57,7 @@
             </div>
             <div class="flex gap-2">
               <button class="btn btn-secondary btn-sm flex-1" data-logout>${App.icon('log-out', 'size-4')}Keluar</button>
-              ${user.role === 'admin' ? `<button class="btn btn-quiet btn-sm" data-reset title="Buat ulang data contoh">${App.icon('rotate-ccw', 'size-4')}<span class="sr-only">Reset data demo</span></button>` : ''}
+              ${App.auth.can('user.manage') ? `<button class="btn btn-quiet btn-sm" data-reset title="Buat ulang data contoh">${App.icon('rotate-ccw', 'size-4')}<span class="sr-only">Reset data demo</span></button>` : ''}
             </div>
           </div>
         </aside>

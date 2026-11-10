@@ -10,7 +10,7 @@
     title: () => 'Kunjungan',
     render() {
       const user = App.auth.user();
-      const isDokter = user.role === 'klinisi' && user.profesi === 'Dokter';
+      const isDokter = user.role === 'tenaga_medis' && user.profesi === 'Dokter';
       return `
       <header class="flex flex-wrap items-end justify-between gap-4">
         <div><h1 class="text-2xl font-semibold tracking-tight">Kunjungan</h1>
@@ -37,7 +37,7 @@
     },
     mount(root) {
       const user = App.auth.user();
-      const state = { tab: 'today', q: '', jenis: '', status: '', page: 1, mine: user.role === 'klinisi' && user.profesi === 'Dokter' };
+      const state = { tab: 'today', q: '', jenis: '', status: '', page: 1, mine: user.role === 'tenaga_medis' && user.profesi === 'Dokter' };
       const tbody = root.querySelector('#vbody');
       const pager = root.querySelector('#vpager');
       const todayStr = ui.toDateStr(new Date());

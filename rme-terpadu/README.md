@@ -19,14 +19,14 @@ jadi **tidak perlu `npm install` hanya untuk menjalankan**.
 
 | Peran | Nama pengguna | Kata sandi |
 |---|---|---|
-| Dokter (Poli Umum) | `dokter` | `dokter123` |
-| Perawat | `perawat` | `perawat123` |
-| Petugas Pendaftaran | `daftar` | `daftar123` |
-| Petugas Rekam Medis | `rm` | `rm123` |
-| Administrator | `admin` | `admin123` |
+| Petugas RME (administrator, pendaftaran, rekam medis) | `admin` | `admin123` |
+| Tenaga Medis, dokter (Poli Umum) | `dokter` | `dokter123` |
+| Tenaga Medis, perawat | `perawat` | `perawat123` |
+
+Akun `daftar` (`daftar123`) dan `rm` (`rm123`) juga tersedia, keduanya berperan sebagai Petugas RME.
 
 Data contoh (58 pasien, sekitar 400 kunjungan) dibuat otomatis saat pertama dibuka, relatif terhadap tanggal hari itu.
-Administrator bisa membuat ulang data lewat tombol reset di bagian bawah sidebar.
+Petugas RME bisa membuat ulang data lewat tombol reset di bagian bawah sidebar.
 
 ## Fitur dan kaitannya dengan laporan
 
@@ -36,7 +36,7 @@ Administrator bisa membuat ulang data lewat tombol reset di bagian bawah sidebar
 | Riwayat kunjungan dalam satu garis waktu | **Detail pasien**: rawat jalan dan rawat inap bercampur dalam satu timeline, ada filter dan pencarian di dalam riwayat |
 | Rawat jalan dan rawat inap satu basis data | Satu penyimpanan (`js/store.js`) dipakai semua halaman |
 | Mencegah duplikasi nomor RM | No. RM dibuat otomatis dan tidak bisa diubah. Formulir pasien baru memblokir NIK yang sudah ada dan memperingatkan nama mirip dengan tanggal lahir sama |
-| Hak akses sesuai peran | 4 peran (admin, pendaftaran, dokter/perawat, rekam medis). Aturan ada di satu tempat (`js/auth.js`) dan matriksnya tampil di halaman **Pengguna dan hak akses** |
+| Hak akses sesuai peran | 2 aktor: Petugas RME (administrator, pendaftaran, rekam medis) dan Tenaga Medis (dokter, perawat). Aturan ada di satu tempat (`js/auth.js`) dan matriksnya tampil di halaman **Pengguna dan hak akses** |
 | Pendaftaran pasien, pencatatan kunjungan, pemeriksaan (diagnosis dan tindakan) | Halaman **Pasien baru**, **Kunjungan baru**, dan **Pemeriksaan** (tanda vital, anamnesis, diagnosis ICD-10, tindakan, terapi) |
 | Keamanan data pasien | **Log aktivitas** mencatat siapa membuka atau mengubah data pasien |
 

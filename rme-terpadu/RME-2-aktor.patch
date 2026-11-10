@@ -1,16 +1,58 @@
-diff --git a/js/auth.js b/js/auth.js
---- a/js/auth.js
-+++ b/js/auth.js
-@@ -5,6 +5,4 @@
+diff --git a/rme-terpadu/README.md b/rme-terpadu/README.md
+index f3f3b1a..de163e2 100644
+--- a/rme-terpadu/README.md
++++ b/rme-terpadu/README.md
+@@ -19,14 +19,14 @@ jadi **tidak perlu `npm install` hanya untuk menjalankan**.
+ 
+ | Peran | Nama pengguna | Kata sandi |
+ |---|---|---|
+-| Dokter (Poli Umum) | `dokter` | `dokter123` |
+-| Perawat | `perawat` | `perawat123` |
+-| Petugas Pendaftaran | `daftar` | `daftar123` |
+-| Petugas Rekam Medis | `rm` | `rm123` |
+-| Administrator | `admin` | `admin123` |
++| Petugas RME (administrator, pendaftaran, rekam medis) | `admin` | `admin123` |
++| Tenaga Medis, dokter (Poli Umum) | `dokter` | `dokter123` |
++| Tenaga Medis, perawat | `perawat` | `perawat123` |
++
++Akun `daftar` (`daftar123`) dan `rm` (`rm123`) juga tersedia, keduanya berperan sebagai Petugas RME.
+ 
+ Data contoh (58 pasien, sekitar 400 kunjungan) dibuat otomatis saat pertama dibuka, relatif terhadap tanggal hari itu.
+-Administrator bisa membuat ulang data lewat tombol reset di bagian bawah sidebar.
++Petugas RME bisa membuat ulang data lewat tombol reset di bagian bawah sidebar.
+ 
+ ## Fitur dan kaitannya dengan laporan
+ 
+@@ -36,7 +36,7 @@ Administrator bisa membuat ulang data lewat tombol reset di bagian bawah sidebar
+ | Riwayat kunjungan dalam satu garis waktu | **Detail pasien**: rawat jalan dan rawat inap bercampur dalam satu timeline, ada filter dan pencarian di dalam riwayat |
+ | Rawat jalan dan rawat inap satu basis data | Satu penyimpanan (`js/store.js`) dipakai semua halaman |
+ | Mencegah duplikasi nomor RM | No. RM dibuat otomatis dan tidak bisa diubah. Formulir pasien baru memblokir NIK yang sudah ada dan memperingatkan nama mirip dengan tanggal lahir sama |
+-| Hak akses sesuai peran | 4 peran (admin, pendaftaran, dokter/perawat, rekam medis). Aturan ada di satu tempat (`js/auth.js`) dan matriksnya tampil di halaman **Pengguna dan hak akses** |
++| Hak akses sesuai peran | 2 aktor: Petugas RME (administrator, pendaftaran, rekam medis) dan Tenaga Medis (dokter, perawat). Aturan ada di satu tempat (`js/auth.js`) dan matriksnya tampil di halaman **Pengguna dan hak akses** |
+ | Pendaftaran pasien, pencatatan kunjungan, pemeriksaan (diagnosis dan tindakan) | Halaman **Pasien baru**, **Kunjungan baru**, dan **Pemeriksaan** (tanda vital, anamnesis, diagnosis ICD-10, tindakan, terapi) |
+ | Keamanan data pasien | **Log aktivitas** mencatat siapa membuka atau mengubah data pasien |
+ 
+diff --git a/rme-terpadu/js/auth.js b/rme-terpadu/js/auth.js
+index b8b2ebd..5b4d84f 100644
+--- a/rme-terpadu/js/auth.js
++++ b/rme-terpadu/js/auth.js
+@@ -3,31 +3,31 @@
+   const App = (window.App = window.App || {});
+ 
    const ROLES = {
 -    admin: { label: 'Administrator', desc: 'Mengelola pengguna dan memantau log aktivitas.' },
 -    pendaftaran: { label: 'Petugas Pendaftaran', desc: 'Mendaftarkan pasien dan kunjungan.' },
 -    klinisi: { label: 'Dokter / Perawat', desc: 'Melihat riwayat dan mengisi pemeriksaan.' },
 -    rm: { label: 'Petugas Rekam Medis', desc: 'Menjaga mutu data dan menelusuri riwayat.' },
-+    petugas_rme: { label: 'Petugas RME', desc: 'Mengelola akun, data pasien, kunjungan, dan rekam medis.' },
-+    tenaga_medis: { label: 'Tenaga Medis', desc: 'Melakukan pemeriksaan, melihat riwayat medis, dan mencetak ringkasan.' },
++    petugas_rme: { label: 'Petugas RME', desc: 'Administrator, pendaftaran, dan rekam medis: mengelola pengguna, data pasien, kunjungan, dan log aktivitas.' },
++    tenaga_medis: { label: 'Tenaga Medis', desc: 'Dokter dan perawat: melakukan pemeriksaan, melihat riwayat medis, dan mencetak ringkasan.' },
    };
-@@ -16,14 +14,14 @@
+ 
++
+   /**
+    * Satu-satunya sumber aturan hak akses.
+    * Menu, penjaga halaman, tombol, dan matriks di halaman Pengguna semuanya membaca dari sini.
+    */
    const PERMS = [
 -    { key: 'search', label: 'Mencari riwayat pasien', roles: ['pendaftaran', 'klinisi', 'rm'] },
 -    { key: 'patient.view', label: 'Melihat identitas pasien', roles: ['pendaftaran', 'klinisi', 'rm'] },
@@ -37,10 +79,205 @@ diff --git a/js/auth.js b/js/auth.js
 +    { key: 'audit.view', label: 'Melihat log aktivitas', roles: ['petugas_rme'] },
 +    { key: 'user.manage', label: 'Mengelola pengguna', roles: ['petugas_rme'] },
    ];
-diff --git a/js/seed.js b/js/seed.js
---- a/js/seed.js
-+++ b/js/seed.js
-@@ -8,18 +8,18 @@
+ 
++
+   const auth = (App.auth = { ROLES, PERMS });
+   let current = null;
+ 
+@@ -54,7 +54,7 @@
+   auth.login = function (username, password) {
+     const u = App.store.users().find((x) => x.username.toLowerCase() === String(username).trim().toLowerCase());
+     if (!u || u.password !== password) return { ok: false, error: 'Nama pengguna atau kata sandi salah.' };
+-    if (!u.aktif) return { ok: false, error: 'Akun ini dinonaktifkan. Hubungi administrator.' };
++    if (!u.aktif) return { ok: false, error: 'Akun ini dinonaktifkan. Hubungi Petugas RME.' };
+     current = u;
+     App.ui.storage.set(App.config.sessionKey, { userId: u.id });
+     App.store.log('Masuk', 'Login ke sistem');
+diff --git a/rme-terpadu/js/layout.js b/rme-terpadu/js/layout.js
+index 5c5e163..33e7ea5 100644
+--- a/rme-terpadu/js/layout.js
++++ b/rme-terpadu/js/layout.js
+@@ -57,7 +57,7 @@
+             </div>
+             <div class="flex gap-2">
+               <button class="btn btn-secondary btn-sm flex-1" data-logout>${App.icon('log-out', 'size-4')}Keluar</button>
+-              ${user.role === 'admin' ? `<button class="btn btn-quiet btn-sm" data-reset title="Buat ulang data contoh">${App.icon('rotate-ccw', 'size-4')}<span class="sr-only">Reset data demo</span></button>` : ''}
++              ${App.auth.can('user.manage') ? `<button class="btn btn-quiet btn-sm" data-reset title="Buat ulang data contoh">${App.icon('rotate-ccw', 'size-4')}<span class="sr-only">Reset data demo</span></button>` : ''}
+             </div>
+           </div>
+         </aside>
+diff --git a/rme-terpadu/js/pages/dashboard.js b/rme-terpadu/js/pages/dashboard.js
+index cd86583..652a86e 100644
+--- a/rme-terpadu/js/pages/dashboard.js
++++ b/rme-terpadu/js/pages/dashboard.js
+@@ -111,18 +111,17 @@
+   function sidePanels(user, s) {
+     const store = App.store;
+     let html = '';
+-    if (user.role === 'klinisi') {
++    if (user.role === 'tenaga_medis') {
+       const mine = s.todayVisits
+         .filter((v) => v.jenis === 'RJ' && (user.profesi === 'Perawat' || v.dokterId === user.id))
+         .sort((a, b) => (a.tglMasuk < b.tglMasuk ? -1 : 1));
+       const waiting = mine.filter((v) => v.status !== 'Selesai').length;
+       html += `<div class="panel"><div class="panel-head"><h2 class="text-sm font-semibold">${user.profesi === 'Perawat' ? 'Antrean rawat jalan hari ini' : 'Antrean saya hari ini'}</h2><span class="text-xs text-ink-500">${waiting} belum selesai</span></div>
+         ${mine.length ? `<ul class="divide-y divide-ink-100">${mine.map(visitItem).join('')}</ul>` : ui.empty('Belum ada antrean', 'Pasien yang didaftarkan ke poli Anda akan muncul di sini.')}</div>`;
+-    } else if (user.role === 'pendaftaran') {
++    } else {
+       const list = s.todayVisits.slice().sort((a, b) => (a.tglMasuk < b.tglMasuk ? 1 : -1)).slice(0, 8);
+       html += `<div class="panel"><div class="panel-head"><h2 class="text-sm font-semibold">Pendaftaran hari ini</h2><a class="text-xs font-medium text-brand-700 hover:underline" href="#/kunjungan">Lihat semua</a></div>
+         ${list.length ? `<ul class="divide-y divide-ink-100">${list.map(visitItem).join('')}</ul>` : ui.empty('Belum ada pendaftaran hari ini', '', `<a class="btn btn-primary" href="#/kunjungan/baru">Daftarkan kunjungan</a>`)}</div>`;
+-    } else {
+       const logs = store.audit().slice(0, 7);
+       html += `<div class="panel"><div class="panel-head"><h2 class="text-sm font-semibold">Aktivitas terbaru</h2><a class="text-xs font-medium text-brand-700 hover:underline" href="#/log">Lihat log</a></div>
+         <ul class="divide-y divide-ink-100">${logs
+@@ -164,7 +163,7 @@
+       const sample = App.store.patients()[5];
+ 
+       const items =
+-        user.role === 'admin'
++        user.role === 'petugas_rme'
+           ? [
+               { label: 'Pengguna aktif', value: App.store.users().filter((u) => u.aktif).length },
+               { label: 'Pasien terdaftar', value: s.patients },
+@@ -206,7 +205,7 @@
+       <section class="mt-6" aria-label="Ringkasan">${kpi(items)}</section>
+ 
+       <div class="mt-6 grid gap-6 lg:grid-cols-[minmax(0,1fr)_23rem]">
+-        <div class="space-y-6">${chart(s.days)}${canHistory ? topDiagnoses(s.topDx) : usersByRole()}</div>
++        <div class="space-y-6">${chart(s.days)}${canHistory ? topDiagnoses(s.topDx) : ''}${App.auth.can('user.manage') ? usersByRole() : ''}</div>
+         <div class="space-y-6">${sidePanels(user, s)}</div>
+       </div>`;
+     },
+diff --git a/rme-terpadu/js/pages/login.js b/rme-terpadu/js/pages/login.js
+index b322f69..3e9021f 100644
+--- a/rme-terpadu/js/pages/login.js
++++ b/rme-terpadu/js/pages/login.js
+@@ -5,11 +5,9 @@
+   App.pages = App.pages || {};
+ 
+   const DEMO = [
+-    { u: 'dokter', p: 'dokter123', role: 'klinisi', note: 'dr. Andi Pratama, Poli Umum' },
+-    { u: 'daftar', p: 'daftar123', role: 'pendaftaran', note: 'Nia Anggraini' },
+-    { u: 'rm', p: 'rm123', role: 'rm', note: 'Wulan Anggraeni' },
+-    { u: 'perawat', p: 'perawat123', role: 'klinisi', note: 'Ns. Siti Aminah' },
+-    { u: 'admin', p: 'admin123', role: 'admin', note: 'Admin Sistem' },
++    { u: 'admin', p: 'admin123', role: 'petugas_rme', note: 'Admin Sistem' },
++    { u: 'dokter', p: 'dokter123', role: 'tenaga_medis', profesi: 'dokter', note: 'dr. Andi Pratama, Poli Umum' },
++    { u: 'perawat', p: 'perawat123', role: 'tenaga_medis', profesi: 'perawat', note: 'Ns. Siti Aminah' },
+   ];
+ 
+   App.pages.login = {
+@@ -61,7 +59,7 @@
+               <ul class="mt-3 divide-y divide-ink-100 rounded-md border border-ink-200">
+                 ${DEMO.map(
+                   (d, i) => `<li><button type="button" data-demo="${i}" class="flex w-full items-center justify-between gap-3 px-3 py-2.5 text-left hover:bg-ink-50">
+-                    <span class="min-w-0"><span class="block text-sm font-medium">${ui.esc(App.auth.ROLES[d.role].label)}${d.u === 'perawat' ? ' (perawat)' : d.role === 'klinisi' ? ' (dokter)' : ''}</span><span class="block truncate text-xs text-ink-500">${ui.esc(d.note)}</span></span>
++                    <span class="min-w-0"><span class="block text-sm font-medium">${ui.esc(App.auth.ROLES[d.role].label)}${d.profesi ? ' (' + d.profesi + ')' : ''}</span><span class="block truncate text-xs text-ink-500">${ui.esc(d.note)}</span></span>
+                     <span class="ident shrink-0 text-xs text-ink-500">${d.u}</span></button></li>`
+                 ).join('')}
+               </ul>
+diff --git a/rme-terpadu/js/pages/users.js b/rme-terpadu/js/pages/users.js
+index f47a8bb..d10e613 100644
+--- a/rme-terpadu/js/pages/users.js
++++ b/rme-terpadu/js/pages/users.js
+@@ -1,4 +1,4 @@
+-/* Pengguna dan hak akses (administrator). */
++/* Pengguna dan hak akses (Petugas RME). */
+ (function () {
+   const App = (window.App = window.App || {});
+   const ui = App.ui;
+@@ -19,7 +19,7 @@
+   }
+ 
+   function formHtml(u) {
+-    const d = u || { nama: '', username: '', role: 'pendaftaran', profesi: 'Dokter', spesialis: 'Poli Umum', aktif: true };
++    const d = u || { nama: '', username: '', role: 'petugas_rme', profesi: 'Dokter', spesialis: 'Poli Umum', aktif: true };
+     return `<form id="uf" class="p-5" novalidate>
+       <h2 class="text-base font-semibold">${u ? 'Ubah pengguna' : 'Tambah pengguna'}</h2>
+       <div class="mt-4 space-y-4">
+@@ -29,7 +29,7 @@
+           <div><label class="label" for="u-pass">Kata sandi</label><input id="u-pass" type="password" class="field" autocomplete="new-password" placeholder="${u ? 'Kosongkan bila tidak diubah' : 'Minimal 6 karakter'}"><p class="err hidden" id="err-u-pass" role="alert"></p></div>
+         </div>
+         <div><label class="label" for="u-role">Peran</label><select id="u-role" class="field">${Object.entries(App.auth.ROLES).map(([k, r]) => `<option value="${k}" ${k === d.role ? 'selected' : ''}>${esc(r.label)}</option>`).join('')}</select></div>
+-        <div id="u-klinisi" class="grid gap-4 sm:grid-cols-2">
++        <div id="u-tenaga-medis" class="grid gap-4 sm:grid-cols-2">
+           <div><label class="label" for="u-profesi">Profesi</label><select id="u-profesi" class="field"><option ${d.profesi === 'Dokter' ? 'selected' : ''}>Dokter</option><option ${d.profesi === 'Perawat' ? 'selected' : ''}>Perawat</option></select></div>
+           <div id="u-spes-wrap"><label class="label" for="u-spes">Poli</label><select id="u-spes" class="field">${App.config.poli.map((x) => `<option ${x === d.spesialis ? 'selected' : ''}>${esc(x)}</option>`).join('')}</select></div>
+         </div>
+@@ -58,7 +58,7 @@
+         tbody.innerHTML = App.store.users().map((u) => `<tr>
+           <td><div class="flex items-center gap-3">${ui.avatar(u.nama, 'size-8 text-xs')}<div class="min-w-0"><div class="font-medium">${esc(u.nama)}${u.id === me.id ? ' <span class="text-xs font-normal text-ink-500">(Anda)</span>' : ''}</div><div class="ident text-xs text-ink-500">${esc(u.username)}</div></div></div></td>
+           <td>${ui.roleBadge(u.role)}</td>
+-          <td class="hidden md:table-cell">${u.role === 'klinisi' ? esc(u.profesi + (u.spesialis ? ', ' + u.spesialis : '')) : '<span class="text-ink-400">-</span>'}</td>
++          <td class="hidden md:table-cell">${u.role === 'tenaga_medis' ? esc(u.profesi + (u.spesialis ? ', ' + u.spesialis : '')) : '<span class="text-ink-400">-</span>'}</td>
+           <td><button type="button" role="switch" aria-checked="${u.aktif}" data-toggle="${u.id}" ${u.id === me.id ? 'disabled title="Anda tidak bisa menonaktifkan akun sendiri"' : ''} class="relative inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full bg-ink-300 transition-colors aria-checked:bg-brand-600 disabled:cursor-not-allowed disabled:opacity-50"><span class="sr-only">Akun ${esc(u.nama)} aktif</span><span class="pointer-events-none absolute left-0.5 size-4 rounded-full bg-white shadow transition-transform ${u.aktif ? 'translate-x-4' : ''}"></span></button></td>
+           <td class="text-right"><button class="btn btn-quiet btn-sm" data-edit="${u.id}">${App.icon('pencil', 'size-3.5')}Ubah</button></td></tr>`).join('');
+       }
+@@ -70,8 +70,8 @@
+         const self = u && u.id === me.id;
+         if (self) $('u-role').disabled = true;
+         function sync() {
+-          const k = $('u-role').value === 'klinisi';
+-          $('u-klinisi').classList.toggle('hidden', !k);
++          const k = $('u-role').value === 'tenaga_medis';
++          $('u-tenaga-medis').classList.toggle('hidden', !k);
+           $('u-spes-wrap').classList.toggle('hidden', !k || $('u-profesi').value !== 'Dokter');
+         }
+         $('u-role').addEventListener('change', sync);
+@@ -97,9 +97,9 @@
+           bad = setErr('u-pass', (!u && pass.length < 6) || (u && pass && pass.length < 6) ? 'Kata sandi minimal 6 karakter.' : '') || bad;
+           if (bad) return form.querySelector('[aria-invalid=true]').focus();
+           const role = self ? u.role : $('u-role').value;
+-          const klinisi = role === 'klinisi';
+-          const profesi = klinisi ? $('u-profesi').value : '';
+-          const data = { nama, username, role, profesi, spesialis: klinisi && profesi === 'Dokter' ? $('u-spes').value : '' };
++          const tenagaMedis = role === 'tenaga_medis';
++          const profesi = tenagaMedis ? $('u-profesi').value : '';
++          const data = { nama, username, role, profesi, spesialis: tenagaMedis && profesi === 'Dokter' ? $('u-spes').value : '' };
+           if (pass) data.password = pass;
+           if (u) {
+             App.store.updateUser(u.id, data);
+diff --git a/rme-terpadu/js/pages/visits.js b/rme-terpadu/js/pages/visits.js
+index 944e851..292c56e 100644
+--- a/rme-terpadu/js/pages/visits.js
++++ b/rme-terpadu/js/pages/visits.js
+@@ -10,7 +10,7 @@
+     title: () => 'Kunjungan',
+     render() {
+       const user = App.auth.user();
+-      const isDokter = user.role === 'klinisi' && user.profesi === 'Dokter';
++      const isDokter = user.role === 'tenaga_medis' && user.profesi === 'Dokter';
+       return `
+       <header class="flex flex-wrap items-end justify-between gap-4">
+         <div><h1 class="text-2xl font-semibold tracking-tight">Kunjungan</h1>
+@@ -37,7 +37,7 @@
+     },
+     mount(root) {
+       const user = App.auth.user();
+-      const state = { tab: 'today', q: '', jenis: '', status: '', page: 1, mine: user.role === 'klinisi' && user.profesi === 'Dokter' };
++      const state = { tab: 'today', q: '', jenis: '', status: '', page: 1, mine: user.role === 'tenaga_medis' && user.profesi === 'Dokter' };
+       const tbody = root.querySelector('#vbody');
+       const pager = root.querySelector('#vpager');
+       const todayStr = ui.toDateStr(new Date());
+diff --git a/rme-terpadu/js/router.js b/rme-terpadu/js/router.js
+index 55f422a..348196f 100644
+--- a/rme-terpadu/js/router.js
++++ b/rme-terpadu/js/router.js
+@@ -126,7 +126,7 @@
+       return `<div class="mx-auto max-w-md py-16 text-center">
+         <span class="mx-auto flex size-12 items-center justify-center rounded-full bg-amber-100 text-amber-800">${App.icon('lock', 'size-5')}</span>
+         <h1 class="mt-4 text-xl font-semibold">Halaman ini tidak tersedia untuk peran Anda</h1>
+-        <p class="mt-2 text-sm text-ink-600">Anda masuk sebagai ${ui.esc(App.auth.ROLES[u.role].label)}. Hak akses tiap peran diatur oleh administrator.</p>
++        <p class="mt-2 text-sm text-ink-600">Anda masuk sebagai ${ui.esc(App.auth.ROLES[u.role].label)}. Hak akses tiap peran diatur oleh Petugas RME.</p>
+         <a class="btn btn-primary mt-5" href="#/dashboard">Ke dashboard</a></div>`;
+     },
+   };
+diff --git a/rme-terpadu/js/seed.js b/rme-terpadu/js/seed.js
+index 15d4c82..8072699 100644
+--- a/rme-terpadu/js/seed.js
++++ b/rme-terpadu/js/seed.js
+@@ -8,20 +8,20 @@
  
    /* ---------- Pengguna ---------- */
    const USERS = [
@@ -73,129 +310,60 @@ diff --git a/js/seed.js b/js/seed.js
 +    { username: 'rm', password: 'rm123', nama: 'Wulan Anggraeni', role: 'petugas_rme' },
 +    { username: 'rm2', password: 'rme12345', nama: 'Fajar Ramadhan', role: 'petugas_rme' },
    ];
-diff --git a/js/store.js b/js/store.js
---- a/js/store.js
-+++ b/js/store.js
-@@ -22,7 +22,29 @@
+ 
+   /* ---------- Template klinis ---------- */
+diff --git a/rme-terpadu/js/store.js b/rme-terpadu/js/store.js
+index 74fd673..f1a4658 100644
+--- a/rme-terpadu/js/store.js
++++ b/rme-terpadu/js/store.js
+@@ -19,11 +19,31 @@
+     }
+   }
+ 
++  /*
++   * Peran lama (admin, pendaftaran, rm, klinisi) disatukan menjadi 2 aktor.
++   * Data localStorage dari versi sebelumnya dipindahkan agar tidak perlu reset.
++   */
++  const LEGACY_ROLES = { admin: 'petugas_rme', pendaftaran: 'petugas_rme', rm: 'petugas_rme', klinisi: 'tenaga_medis' };
++  function migrateRoles() {
++    let changed = false;
++    [db.users, db.audit].forEach((rows) =>
++      (rows || []).forEach((r) => {
++        if (LEGACY_ROLES[r.role]) {
++          r.role = LEGACY_ROLES[r.role];
++          changed = true;
++        }
++      })
++    );
++    if (changed) persist();
++  }
++
    store.init = function () {
      db = ui.storage.get(App.config.storageKey, null);
      if (!db || db.version !== 1) {
        db = App.seed.generate(new Date());
        persist();
++    } else {
++      migrateRoles();
      }
-+
-+    // Satukan role lama agar data localStorage pengguna sebelumnya tetap bisa dipakai.
-+    const roleMap = {
-+      admin: 'petugas_rme',
-+      pendaftaran: 'petugas_rme',
-+      rm: 'petugas_rme',
-+      klinisi: 'tenaga_medis',
-+    };
-+    let migrated = false;
-+    (db.users || []).forEach((u) => {
-+      if (roleMap[u.role] && roleMap[u.role] !== u.role) {
-+        u.role = roleMap[u.role];
-+        migrated = true;
-+      }
-+    });
-+    (db.audit || []).forEach((entry) => {
-+      if (roleMap[entry.role] && roleMap[entry.role] !== entry.role) {
-+        entry.role = roleMap[entry.role];
-+        migrated = true;
-+      }
-+    });
-+    if (migrated) persist();
    };
-@@ -53,1 +75,1 @@
+ 
+@@ -50,7 +70,7 @@
+   store.visits = () => db.visits;
+   store.visit = (id) => db.visits.find((v) => v.id === id) || null;
+   store.audit = () => db.audit;
 -  store.dokter = () => db.users.filter((u) => u.role === 'klinisi' && u.profesi === 'Dokter' && u.aktif);
 +  store.dokter = () => db.users.filter((u) => u.role === 'tenaga_medis' && u.profesi === 'Dokter' && u.aktif);
-diff --git a/js/pages/login.js b/js/pages/login.js
---- a/js/pages/login.js
-+++ b/js/pages/login.js
-@@ -7,7 +7,4 @@
-   const DEMO = [
--    { u: 'dokter', p: 'dokter123', role: 'klinisi', note: 'dr. Andi Pratama, Poli Umum' },
--    { u: 'daftar', p: 'daftar123', role: 'pendaftaran', note: 'Nia Anggraini' },
--    { u: 'rm', p: 'rm123', role: 'rm', note: 'Wulan Anggraeni' },
--    { u: 'perawat', p: 'perawat123', role: 'klinisi', note: 'Ns. Siti Aminah' },
--    { u: 'admin', p: 'admin123', role: 'admin', note: 'Admin Sistem' },
-+    { u: 'admin', p: 'admin123', role: 'petugas_rme', note: 'Admin dan pengelola RME' },
-+    { u: 'dokter', p: 'dokter123', role: 'tenaga_medis', note: 'dr. Andi Pratama, Poli Umum' },
-   ];
-@@ -64,1 +61,1 @@
--                    <span class="min-w-0"><span class="block text-sm font-medium">${ui.esc(App.auth.ROLES[d.role].label)}${d.u === 'perawat' ? ' (perawat)' : d.role === 'klinisi' ? ' (dokter)' : ''}</span><span class="block truncate text-xs text-ink-500">${ui.esc(d.note)}</span></span>
-+                    <span class="min-w-0"><span class="block text-sm font-medium">${ui.esc(App.auth.ROLES[d.role].label)}</span><span class="block truncate text-xs text-ink-500">${ui.esc(d.note)}</span></span>
-diff --git a/js/pages/users.js b/js/pages/users.js
---- a/js/pages/users.js
-+++ b/js/pages/users.js
-@@ -1,1 +1,1 @@
--/* Pengguna dan hak akses (administrator). */
-+/* Pengguna dan hak akses (Petugas RME). */
-@@ -22,1 +22,1 @@
--    const d = u || { nama: '', username: '', role: 'pendaftaran', profesi: 'Dokter', spesialis: 'Poli Umum', aktif: true };
-+    const d = u || { nama: '', username: '', role: 'petugas_rme', profesi: 'Dokter', spesialis: 'Poli Umum', aktif: true };
-@@ -61,1 +61,1 @@
--          <td class="hidden md:table-cell">${u.role === 'klinisi' ? esc(u.profesi + (u.spesialis ? ', ' + u.spesialis : '')) : '<span class="text-ink-400">-</span>'}</td>
-+          <td class="hidden md:table-cell">${u.role === 'tenaga_medis' ? esc(u.profesi + (u.spesialis ? ', ' + u.spesialis : '')) : '<span class="text-ink-400">-</span>'}</td>
-@@ -73,1 +73,1 @@
--          const k = $('u-role').value === 'klinisi';
-+          const k = $('u-role').value === 'tenaga_medis';
-@@ -99,3 +99,3 @@
--          const klinisi = role === 'klinisi';
--          const profesi = klinisi ? $('u-profesi').value : '';
--          const data = { nama, username, role, profesi, spesialis: klinisi && profesi === 'Dokter' ? $('u-spes').value : '' };
-+          const tenagaMedis = role === 'tenaga_medis';
-+          const profesi = tenagaMedis ? $('u-profesi').value : '';
-+          const data = { nama, username, role, profesi, spesialis: tenagaMedis && profesi === 'Dokter' ? $('u-spes').value : '' };
-diff --git a/js/pages/dashboard.js b/js/pages/dashboard.js
---- a/js/pages/dashboard.js
-+++ b/js/pages/dashboard.js
-@@ -111,21 +111,20 @@
-   function sidePanels(user, s) {
-     const store = App.store;
-     let html = '';
--    if (user.role === 'klinisi') {
-+    if (user.role === 'tenaga_medis') {
-       const mine = s.todayVisits
-         .filter((v) => v.jenis === 'RJ' && (user.profesi === 'Perawat' || v.dokterId === user.id))
-         .sort((a, b) => (a.tglMasuk < b.tglMasuk ? -1 : 1));
-       const waiting = mine.filter((v) => v.status !== 'Selesai').length;
-       html += `<div class="panel"><div class="panel-head"><h2 class="text-sm font-semibold">${user.profesi === 'Perawat' ? 'Antrean rawat jalan hari ini' : 'Antrean saya hari ini'}</h2><span class="text-xs text-ink-500">${waiting} belum selesai</span></div>
-         ${mine.length ? `<ul class="divide-y divide-ink-100">${mine.map(visitItem).join('')}</ul>` : ui.empty('Belum ada antrean', 'Pasien yang didaftarkan ke poli Anda akan muncul di sini.')}</div>`;
--    } else if (user.role === 'pendaftaran') {
-+    } else if (user.role === 'petugas_rme') {
-       const list = s.todayVisits.slice().sort((a, b) => (a.tglMasuk < b.tglMasuk ? 1 : -1)).slice(0, 8);
-       html += `<div class="panel"><div class="panel-head"><h2 class="text-sm font-semibold">Pendaftaran hari ini</h2><a class="text-xs font-medium text-brand-700 hover:underline" href="#/kunjungan">Lihat semua</a></div>
-         ${list.length ? `<ul class="divide-y divide-ink-100">${list.map(visitItem).join('')}</ul>` : ui.empty('Belum ada pendaftaran hari ini', '', `<a class="btn btn-primary" href="#/kunjungan/baru">Daftarkan kunjungan</a>`)}</div>`;
--    } else {
-       const logs = store.audit().slice(0, 7);
-       html += `<div class="panel"><div class="panel-head"><h2 class="text-sm font-semibold">Aktivitas terbaru</h2><a class="text-xs font-medium text-brand-700 hover:underline" href="#/log">Lihat log</a></div>
-         <ul class="divide-y divide-ink-100">${logs
-           .map((l) => `<li class="px-4 py-2.5 text-sm"><div class="flex justify-between gap-3"><span class="font-medium">${esc(l.aksi)}</span><span class="shrink-0 text-xs text-ink-500">${ui.fmtTime(l.ts)}</span></div><div class="truncate text-xs text-ink-500">${esc(l.nama)}${l.detail ? ', ' + esc(l.detail) : ''}</div></li>`)
-           .join('')}</ul></div>`;
-     }
-@@ -167,1 +166,1 @@
--        user.role === 'admin'
-+        user.role === 'petugas_rme'
-diff --git a/js/pages/visits.js b/js/pages/visits.js
---- a/js/pages/visits.js
-+++ b/js/pages/visits.js
-@@ -13,1 +13,1 @@
--      const isDokter = user.role === 'klinisi' && user.profesi === 'Dokter';
-+      const isDokter = user.role === 'tenaga_medis' && user.profesi === 'Dokter';
-@@ -40,1 +40,1 @@
--      const state = { tab: 'today', q: '', jenis: '', status: '', page: 1, mine: user.role === 'klinisi' && user.profesi === 'Dokter' };
-+      const state = { tab: 'today', q: '', jenis: '', status: '', page: 1, mine: user.role === 'tenaga_medis' && user.profesi === 'Dokter' };
-diff --git a/js/layout.js b/js/layout.js
---- a/js/layout.js
-+++ b/js/layout.js
-@@ -60,1 +60,1 @@
--              ${user.role === 'admin' ? `<button class="btn btn-quiet btn-sm" data-reset title="Buat ulang data contoh">${App.icon('rotate-ccw', 'size-4')}<span class="sr-only">Reset data demo</span></button>` : ''}
-+              ${user.username === 'admin' ? `<button class="btn btn-quiet btn-sm" data-reset title="Buat ulang data contoh">${App.icon('rotate-ccw', 'size-4')}<span class="sr-only">Reset data demo</span></button>` : ''}
-diff --git a/js/ui.js b/js/ui.js
---- a/js/ui.js
-+++ b/js/ui.js
-@@ -165,6 +165,4 @@
+ 
+   const byDateDesc = (a, b) => (a.tglMasuk < b.tglMasuk ? 1 : a.tglMasuk > b.tglMasuk ? -1 : 0);
+   store.visitsOf = (patientId) => db.visits.filter((v) => v.patientId === patientId).sort(byDateDesc);
+diff --git a/rme-terpadu/js/ui.js b/rme-terpadu/js/ui.js
+index 72332cd..d5ccc80 100644
+--- a/rme-terpadu/js/ui.js
++++ b/rme-terpadu/js/ui.js
+@@ -163,10 +163,8 @@
+   };
+   ui.roleBadge = function (role) {
      const map = {
 -      admin: 'bg-ink-800 text-white',
 -      pendaftaran: 'bg-amber-100 text-amber-900',
@@ -204,3 +372,5 @@ diff --git a/js/ui.js b/js/ui.js
 +      petugas_rme: 'bg-ink-800 text-white',
 +      tenaga_medis: 'bg-sky-100 text-sky-800',
      };
+     const r = App.auth.ROLES[role];
+     return `<span class="badge ${map[role] || ''}">${ui.esc(r ? r.label : role)}</span>`;

@@ -19,11 +19,31 @@
     }
   }
 
+  /*
+   * Peran lama (admin, pendaftaran, rm, klinisi) disatukan menjadi 2 aktor.
+   * Data localStorage dari versi sebelumnya dipindahkan agar tidak perlu reset.
+   */
+  const LEGACY_ROLES = { admin: 'petugas_rme', pendaftaran: 'petugas_rme', rm: 'petugas_rme', klinisi: 'tenaga_medis' };
+  function migrateRoles() {
+    let changed = false;
+    [db.users, db.audit].forEach((rows) =>
+      (rows || []).forEach((r) => {
+        if (LEGACY_ROLES[r.role]) {
+          r.role = LEGACY_ROLES[r.role];
+          changed = true;
+        }
+      })
+    );
+    if (changed) persist();
+  }
+
   store.init = function () {
     db = ui.storage.get(App.config.storageKey, null);
     if (!db || db.version !== 1) {
       db = App.seed.generate(new Date());
       persist();
+    } else {
+      migrateRoles();
     }
   };
 
@@ -50,7 +70,7 @@
   store.visits = () => db.visits;
   store.visit = (id) => db.visits.find((v) => v.id === id) || null;
   store.audit = () => db.audit;
-  store.dokter = () => db.users.filter((u) => u.role === 'klinisi' && u.profesi === 'Dokter' && u.aktif);
+  store.dokter = () => db.users.filter((u) => u.role === 'tenaga_medis' && u.profesi === 'Dokter' && u.aktif);
 
   const byDateDesc = (a, b) => (a.tglMasuk < b.tglMasuk ? 1 : a.tglMasuk > b.tglMasuk ? -1 : 0);
   store.visitsOf = (patientId) => db.visits.filter((v) => v.patientId === patientId).sort(byDateDesc);
