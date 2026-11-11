@@ -20,10 +20,10 @@ jadi **tidak perlu `npm install` hanya untuk menjalankan**.
 | Peran | Nama pengguna | Kata sandi |
 |---|---|---|
 | Petugas RME (administrator, pendaftaran, rekam medis) | `admin` | `admin123` |
-| Tenaga Medis, dokter (Poli Umum) | `dokter` | `dokter123` |
-| Tenaga Medis, perawat | `perawat` | `perawat123` |
+| Tenaga Medis (dokter dan perawat, satu akun) | `nakes` | `nakes123` |
 
 Akun `daftar` (`daftar123`) dan `rm` (`rm123`) juga tersedia, keduanya berperan sebagai Petugas RME.
+Jika aplikasi sudah pernah dibuka sebelumnya, akun lama `dokter` otomatis berganti nama menjadi `nakes`.
 
 Data contoh (58 pasien, sekitar 400 kunjungan) dibuat otomatis saat pertama dibuka, relatif terhadap tanggal hari itu.
 Petugas RME bisa membuat ulang data lewat tombol reset di bagian bawah sidebar.
@@ -36,7 +36,7 @@ Petugas RME bisa membuat ulang data lewat tombol reset di bagian bawah sidebar.
 | Riwayat kunjungan dalam satu garis waktu | **Detail pasien**: rawat jalan dan rawat inap bercampur dalam satu timeline, ada filter dan pencarian di dalam riwayat |
 | Rawat jalan dan rawat inap satu basis data | Satu penyimpanan (`js/store.js`) dipakai semua halaman |
 | Mencegah duplikasi nomor RM | No. RM dibuat otomatis dan tidak bisa diubah. Formulir pasien baru memblokir NIK yang sudah ada dan memperingatkan nama mirip dengan tanggal lahir sama |
-| Hak akses sesuai peran | 2 aktor: Petugas RME (administrator, pendaftaran, rekam medis) dan Tenaga Medis (dokter, perawat). Aturan ada di satu tempat (`js/auth.js`) dan matriksnya tampil di halaman **Pengguna dan hak akses** |
+| Hak akses sesuai peran | 2 aktor: Petugas RME (administrator, pendaftaran, rekam medis) dan Tenaga Medis (dokter dan perawat dalam satu akun). Aturan ada di satu tempat (`js/auth.js`) dan matriksnya tampil di halaman **Pengguna dan hak akses** |
 | Pendaftaran pasien, pencatatan kunjungan, pemeriksaan (diagnosis dan tindakan) | Halaman **Pasien baru**, **Kunjungan baru**, dan **Pemeriksaan** (tanda vital, anamnesis, diagnosis ICD-10, tindakan, terapi) |
 | Keamanan data pasien | **Log aktivitas** mencatat siapa membuka atau mengubah data pasien |
 

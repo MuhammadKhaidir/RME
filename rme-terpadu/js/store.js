@@ -20,7 +20,8 @@
   }
 
   /*
-   * Peran lama (admin, pendaftaran, rm, klinisi) disatukan menjadi 2 aktor.
+   * Peran lama (admin, pendaftaran, rm, klinisi) disatukan menjadi 2 aktor, dan
+   * dokter/perawat disatukan menjadi satu akun Tenaga Medis (tanpa pembeda profesi).
    * Data localStorage dari versi sebelumnya dipindahkan agar tidak perlu reset.
    */
   const LEGACY_ROLES = { admin: 'petugas_rme', pendaftaran: 'petugas_rme', rm: 'petugas_rme', klinisi: 'tenaga_medis' };
@@ -34,6 +35,21 @@
         }
       })
     );
+    (db.users || []).forEach((u) => {
+      if ('profesi' in u) {
+        delete u.profesi;
+        changed = true;
+      }
+      // Akun demo "dokter" menjadi "nakes" (dokter.pd menjadi nakes.pd, dan seterusnya).
+      if (u.role === 'tenaga_medis' && /^dokter(\.|$)/.test(u.username)) {
+        const baru = u.username.replace(/^dokter/, 'nakes');
+        if (!db.users.some((x) => x.username === baru)) {
+          u.username = baru;
+          if (u.password === 'dokter123') u.password = 'nakes123';
+          changed = true;
+        }
+      }
+    });
     if (changed) persist();
   }
 
@@ -70,7 +86,7 @@
   store.visits = () => db.visits;
   store.visit = (id) => db.visits.find((v) => v.id === id) || null;
   store.audit = () => db.audit;
-  store.dokter = () => db.users.filter((u) => u.role === 'tenaga_medis' && u.profesi === 'Dokter' && u.aktif);
+  store.tenagaMedis = () => db.users.filter((u) => u.role === 'tenaga_medis' && u.aktif);
 
   const byDateDesc = (a, b) => (a.tglMasuk < b.tglMasuk ? 1 : a.tglMasuk > b.tglMasuk ? -1 : 0);
   store.visitsOf = (patientId) => db.visits.filter((v) => v.patientId === patientId).sort(byDateDesc);
@@ -183,7 +199,7 @@
   };
 
   store.addUser = function (data) {
-    const u = Object.assign({ profesi: '', spesialis: '', aktif: true }, data, { id: nextId('u') });
+    const u = Object.assign({ spesialis: '', aktif: true }, data, { id: nextId('u') });
     db.users.push(u);
     persist();
     store.log('Menambah pengguna', `${u.nama} (${u.username})`);

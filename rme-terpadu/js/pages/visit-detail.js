@@ -1,6 +1,6 @@
 /*
  * Detail kunjungan.
- * Dokter / perawat: mengisi pemeriksaan sambil melihat riwayat sebelumnya di sisi kanan.
+ * Tenaga Medis: mengisi pemeriksaan sambil melihat riwayat sebelumnya di sisi kanan.
  * Peran lain: tampilan baca saja sesuai hak akses.
  */
 (function () {
@@ -75,7 +75,7 @@
           <section class="panel" aria-labelledby="h-rekam"><div class="panel-head"><h2 id="h-rekam" class="text-sm font-semibold">Catatan pemeriksaan</h2></div>
             <div class="p-4"><dl class="mb-4"><dt class="text-xs font-medium text-ink-500">Keluhan utama</dt><dd class="mt-1 text-sm">${esc(v.keluhan)}</dd></dl>
             ${full || v.diagnosis.length ? App.views.visitBody(v, { full }) : ''}
-            ${v.status === 'Terdaftar' && App.auth.can('visit.examine') === false ? `<p class="mt-4 text-sm text-ink-500">Pemeriksaan belum dimulai. Hasil akan muncul setelah dokter atau perawat mengisinya.</p>` : ''}
+            ${v.status === 'Terdaftar' && App.auth.can('visit.examine') === false ? `<p class="mt-4 text-sm text-ink-500">Pemeriksaan belum dimulai. Hasil akan muncul setelah tenaga medis mengisinya.</p>` : ''}
             ${v.diperbaruiOleh ? `<p class="mt-4 border-t border-ink-100 pt-3 text-xs text-ink-500">Terakhir diisi oleh ${esc(App.views.userName(v.diperbaruiOleh))}.</p>` : ''}</div></section>
           ${full ? `<aside>${historyPanel(p, v)}</aside>` : ''}
         </div>`;

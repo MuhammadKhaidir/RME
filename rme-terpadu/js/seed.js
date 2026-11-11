@@ -11,15 +11,13 @@
     { username: 'admin', password: 'admin123', nama: 'Admin Sistem', role: 'petugas_rme' },
     { username: 'daftar', password: 'daftar123', nama: 'Nia Anggraini', role: 'petugas_rme' },
     { username: 'daftar2', password: 'rme12345', nama: 'Rudi Hartono', role: 'petugas_rme' },
-    { username: 'dokter', password: 'dokter123', nama: 'dr. Andi Pratama', role: 'tenaga_medis', profesi: 'Dokter', spesialis: 'Poli Umum' },
-    { username: 'dokter.pd', password: 'rme12345', nama: 'dr. Maya Sari, Sp.PD', role: 'tenaga_medis', profesi: 'Dokter', spesialis: 'Penyakit Dalam' },
-    { username: 'dokter.anak', password: 'rme12345', nama: 'dr. Hendra Wijaya, Sp.A', role: 'tenaga_medis', profesi: 'Dokter', spesialis: 'Anak' },
-    { username: 'dokter.jp', password: 'rme12345', nama: 'dr. Lestari Putri, Sp.JP', role: 'tenaga_medis', profesi: 'Dokter', spesialis: 'Jantung' },
-    { username: 'dokter.paru', password: 'rme12345', nama: 'dr. Bambang Nugroho, Sp.P', role: 'tenaga_medis', profesi: 'Dokter', spesialis: 'Paru' },
-    { username: 'dokter.saraf', password: 'rme12345', nama: 'dr. Rahma Dewi, Sp.N', role: 'tenaga_medis', profesi: 'Dokter', spesialis: 'Saraf' },
-    { username: 'dokter.bedah', password: 'rme12345', nama: 'dr. Gilang Saputra, Sp.B', role: 'tenaga_medis', profesi: 'Dokter', spesialis: 'Bedah' },
-    { username: 'perawat', password: 'perawat123', nama: 'Ns. Siti Aminah', role: 'tenaga_medis', profesi: 'Perawat', spesialis: '' },
-    { username: 'perawat2', password: 'rme12345', nama: 'Ns. Dedi Kurniawan', role: 'tenaga_medis', profesi: 'Perawat', spesialis: '' },
+    { username: 'nakes', password: 'nakes123', nama: 'dr. Andi Pratama', role: 'tenaga_medis', spesialis: 'Poli Umum' },
+    { username: 'nakes.pd', password: 'rme12345', nama: 'dr. Maya Sari, Sp.PD', role: 'tenaga_medis', spesialis: 'Penyakit Dalam' },
+    { username: 'nakes.anak', password: 'rme12345', nama: 'dr. Hendra Wijaya, Sp.A', role: 'tenaga_medis', spesialis: 'Anak' },
+    { username: 'nakes.jp', password: 'rme12345', nama: 'dr. Lestari Putri, Sp.JP', role: 'tenaga_medis', spesialis: 'Jantung' },
+    { username: 'nakes.paru', password: 'rme12345', nama: 'dr. Bambang Nugroho, Sp.P', role: 'tenaga_medis', spesialis: 'Paru' },
+    { username: 'nakes.saraf', password: 'rme12345', nama: 'dr. Rahma Dewi, Sp.N', role: 'tenaga_medis', spesialis: 'Saraf' },
+    { username: 'nakes.bedah', password: 'rme12345', nama: 'dr. Gilang Saputra, Sp.B', role: 'tenaga_medis', spesialis: 'Bedah' },
     { username: 'rm', password: 'rm123', nama: 'Wulan Anggraeni', role: 'petugas_rme' },
     { username: 'rm2', password: 'rme12345', nama: 'Fajar Ramadhan', role: 'petugas_rme' },
   ];
@@ -337,10 +335,10 @@
     let seq = 0;
     const nid = (p) => p + ++seq;
 
-    const users = USERS.map((u) => Object.assign({ id: nid('u'), aktif: true, profesi: '', spesialis: '' }, u));
+    const users = USERS.map((u) => Object.assign({ id: nid('u'), aktif: true, spesialis: '' }, u));
     const dokterPoli = {};
     users.forEach((u) => {
-      if (u.profesi === 'Dokter') dokterPoli[u.spesialis] = u;
+      if (u.role === 'tenaga_medis' && u.spesialis) dokterPoli[u.spesialis] = u;
     });
 
     /* Pasien */

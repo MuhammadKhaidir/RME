@@ -112,12 +112,12 @@
     const store = App.store;
     let html = '';
     if (user.role === 'tenaga_medis') {
-      const mine = s.todayVisits
-        .filter((v) => v.jenis === 'RJ' && (user.profesi === 'Perawat' || v.dokterId === user.id))
+      const antrean = s.todayVisits
+        .filter((v) => v.jenis === 'RJ')
         .sort((a, b) => (a.tglMasuk < b.tglMasuk ? -1 : 1));
-      const waiting = mine.filter((v) => v.status !== 'Selesai').length;
-      html += `<div class="panel"><div class="panel-head"><h2 class="text-sm font-semibold">${user.profesi === 'Perawat' ? 'Antrean rawat jalan hari ini' : 'Antrean saya hari ini'}</h2><span class="text-xs text-ink-500">${waiting} belum selesai</span></div>
-        ${mine.length ? `<ul class="divide-y divide-ink-100">${mine.map(visitItem).join('')}</ul>` : ui.empty('Belum ada antrean', 'Pasien yang didaftarkan ke poli Anda akan muncul di sini.')}</div>`;
+      const waiting = antrean.filter((v) => v.status !== 'Selesai').length;
+      html += `<div class="panel"><div class="panel-head"><h2 class="text-sm font-semibold">Antrean rawat jalan hari ini</h2><span class="text-xs text-ink-500">${waiting} belum selesai</span></div>
+        ${antrean.length ? `<ul class="divide-y divide-ink-100">${antrean.map(visitItem).join('')}</ul>` : ui.empty('Belum ada antrean', 'Pasien rawat jalan yang didaftarkan hari ini akan muncul di sini.')}</div>`;
     } else {
       const list = s.todayVisits.slice().sort((a, b) => (a.tglMasuk < b.tglMasuk ? 1 : -1)).slice(0, 8);
       html += `<div class="panel"><div class="panel-head"><h2 class="text-sm font-semibold">Pendaftaran hari ini</h2><a class="text-xs font-medium text-brand-700 hover:underline" href="#/kunjungan">Lihat semua</a></div>

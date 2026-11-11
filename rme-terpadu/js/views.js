@@ -71,7 +71,7 @@
     const tokens = o.tokens || [];
     if (!o.full) {
       return `<dl class="grid gap-4 sm:grid-cols-2">${block('Diagnosis', views.diagnosisList(v.diagnosis.slice(0, 1), tokens))}${block('Keluhan utama', ui.hl(v.keluhan, tokens))}</dl>
-        <p class="mt-3 text-xs text-ink-500">Rincian klinis (tanda vital, tindakan, terapi) hanya tampil untuk dokter, perawat, dan petugas rekam medis.</p>`;
+        <p class="mt-3 text-xs text-ink-500">Rincian klinis (tanda vital, tindakan, terapi) hanya tampil untuk Tenaga Medis dan Petugas RME.</p>`;
     }
     return `<dl class="grid gap-x-8 gap-y-4 sm:grid-cols-2">
       <div class="sm:col-span-2"><dt class="text-xs font-medium text-ink-500">Tanda vital</dt><dd class="mt-1">${views.vitalChips(v.vital)}</dd></div>

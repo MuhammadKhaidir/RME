@@ -19,7 +19,7 @@
   }
 
   function formHtml(u) {
-    const d = u || { nama: '', username: '', role: 'petugas_rme', profesi: 'Dokter', spesialis: 'Poli Umum', aktif: true };
+    const d = u || { nama: '', username: '', role: 'petugas_rme', spesialis: 'Poli Umum', aktif: true };
     return `<form id="uf" class="p-5" novalidate>
       <h2 class="text-base font-semibold">${u ? 'Ubah pengguna' : 'Tambah pengguna'}</h2>
       <div class="mt-4 space-y-4">
@@ -29,9 +29,8 @@
           <div><label class="label" for="u-pass">Kata sandi</label><input id="u-pass" type="password" class="field" autocomplete="new-password" placeholder="${u ? 'Kosongkan bila tidak diubah' : 'Minimal 6 karakter'}"><p class="err hidden" id="err-u-pass" role="alert"></p></div>
         </div>
         <div><label class="label" for="u-role">Peran</label><select id="u-role" class="field">${Object.entries(App.auth.ROLES).map(([k, r]) => `<option value="${k}" ${k === d.role ? 'selected' : ''}>${esc(r.label)}</option>`).join('')}</select></div>
-        <div id="u-tenaga-medis" class="grid gap-4 sm:grid-cols-2">
-          <div><label class="label" for="u-profesi">Profesi</label><select id="u-profesi" class="field"><option ${d.profesi === 'Dokter' ? 'selected' : ''}>Dokter</option><option ${d.profesi === 'Perawat' ? 'selected' : ''}>Perawat</option></select></div>
-          <div id="u-spes-wrap"><label class="label" for="u-spes">Poli</label><select id="u-spes" class="field">${App.config.poli.map((x) => `<option ${x === d.spesialis ? 'selected' : ''}>${esc(x)}</option>`).join('')}</select></div>
+        <div id="u-tenaga-medis">
+          <label class="label" for="u-spes">Poli</label><select id="u-spes" class="field"><option value="" ${d.spesialis ? '' : 'selected'}>Tidak terikat poli</option>${App.config.poli.map((x) => `<option ${x === d.spesialis ? 'selected' : ''}>${esc(x)}</option>`).join('')}</select>
         </div>
       </div>
       <div class="mt-6 flex justify-end gap-2"><button type="button" class="btn btn-secondary" data-close>Batal</button><button class="btn btn-primary" type="submit">${u ? 'Simpan perubahan' : 'Tambah pengguna'}</button></div>
@@ -58,7 +57,7 @@
         tbody.innerHTML = App.store.users().map((u) => `<tr>
           <td><div class="flex items-center gap-3">${ui.avatar(u.nama, 'size-8 text-xs')}<div class="min-w-0"><div class="font-medium">${esc(u.nama)}${u.id === me.id ? ' <span class="text-xs font-normal text-ink-500">(Anda)</span>' : ''}</div><div class="ident text-xs text-ink-500">${esc(u.username)}</div></div></div></td>
           <td>${ui.roleBadge(u.role)}</td>
-          <td class="hidden md:table-cell">${u.role === 'tenaga_medis' ? esc(u.profesi + (u.spesialis ? ', ' + u.spesialis : '')) : '<span class="text-ink-400">-</span>'}</td>
+          <td class="hidden md:table-cell">${u.role === 'tenaga_medis' && u.spesialis ? esc(u.spesialis) : '<span class="text-ink-400">-</span>'}</td>
           <td><button type="button" role="switch" aria-checked="${u.aktif}" data-toggle="${u.id}" ${u.id === me.id ? 'disabled title="Anda tidak bisa menonaktifkan akun sendiri"' : ''} class="relative inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full bg-ink-300 transition-colors aria-checked:bg-brand-600 disabled:cursor-not-allowed disabled:opacity-50"><span class="sr-only">Akun ${esc(u.nama)} aktif</span><span class="pointer-events-none absolute left-0.5 size-4 rounded-full bg-white shadow transition-transform ${u.aktif ? 'translate-x-4' : ''}"></span></button></td>
           <td class="text-right"><button class="btn btn-quiet btn-sm" data-edit="${u.id}">${App.icon('pencil', 'size-3.5')}Ubah</button></td></tr>`).join('');
       }
@@ -70,12 +69,9 @@
         const self = u && u.id === me.id;
         if (self) $('u-role').disabled = true;
         function sync() {
-          const k = $('u-role').value === 'tenaga_medis';
-          $('u-tenaga-medis').classList.toggle('hidden', !k);
-          $('u-spes-wrap').classList.toggle('hidden', !k || $('u-profesi').value !== 'Dokter');
+          $('u-tenaga-medis').classList.toggle('hidden', $('u-role').value !== 'tenaga_medis');
         }
         $('u-role').addEventListener('change', sync);
-        $('u-profesi').addEventListener('change', sync);
         sync();
         $('u-nama').focus();
         const setErr = (id, m) => {
@@ -97,9 +93,7 @@
           bad = setErr('u-pass', (!u && pass.length < 6) || (u && pass && pass.length < 6) ? 'Kata sandi minimal 6 karakter.' : '') || bad;
           if (bad) return form.querySelector('[aria-invalid=true]').focus();
           const role = self ? u.role : $('u-role').value;
-          const tenagaMedis = role === 'tenaga_medis';
-          const profesi = tenagaMedis ? $('u-profesi').value : '';
-          const data = { nama, username, role, profesi, spesialis: tenagaMedis && profesi === 'Dokter' ? $('u-spes').value : '' };
+          const data = { nama, username, role, spesialis: role === 'tenaga_medis' ? $('u-spes').value : '' };
           if (pass) data.password = pass;
           if (u) {
             App.store.updateUser(u.id, data);

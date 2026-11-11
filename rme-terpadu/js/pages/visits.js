@@ -10,7 +10,7 @@
     title: () => 'Kunjungan',
     render() {
       const user = App.auth.user();
-      const isDokter = user.role === 'tenaga_medis' && user.profesi === 'Dokter';
+      const isNakes = user.role === 'tenaga_medis';
       return `
       <header class="flex flex-wrap items-end justify-between gap-4">
         <div><h1 class="text-2xl font-semibold tracking-tight">Kunjungan</h1>
@@ -22,22 +22,22 @@
         <div class="inline-flex rounded-md border border-ink-300 bg-white p-0.5" role="group" aria-label="Rentang" id="tabs">
           ${[['today', 'Hari ini'], ['ri', 'Rawat inap aktif'], ['all', 'Semua']].map(([v, l], i) => `<button type="button" data-tab="${v}" aria-pressed="${i === 0}" class="rounded px-3 py-1.5 text-sm text-ink-700 hover:bg-ink-100 aria-pressed:bg-brand-600 aria-pressed:text-white">${l}</button>`).join('')}
         </div>
-        ${isDokter ? `<label class="inline-flex cursor-pointer items-center gap-2 text-sm"><input type="checkbox" id="mine" class="size-4 accent-brand-600" checked>Hanya pasien saya</label>` : ''}
+        ${isNakes ? `<label class="inline-flex cursor-pointer items-center gap-2 text-sm"><input type="checkbox" id="mine" class="size-4 accent-brand-600">Hanya pasien saya</label>` : ''}
       </div>
 
       <div class="mt-4 flex flex-wrap items-end gap-3">
-        <div class="min-w-56 flex-1 sm:max-w-sm"><label class="label" for="vq">Saring</label><input id="vq" type="search" class="field" placeholder="Nama pasien, No. RM, atau dokter" autocomplete="off"></div>
+        <div class="min-w-56 flex-1 sm:max-w-sm"><label class="label" for="vq">Saring</label><input id="vq" type="search" class="field" placeholder="Nama pasien, No. RM, atau tenaga medis" autocomplete="off"></div>
         <div><label class="label" for="vjenis">Layanan</label><select id="vjenis" class="field w-auto"><option value="">Semua</option><option value="RJ">Rawat jalan</option><option value="RI">Rawat inap</option></select></div>
         <div><label class="label" for="vstatus">Status</label><select id="vstatus" class="field w-auto"><option value="">Semua</option>${['Terdaftar', 'Diperiksa', 'Selesai', 'Dirawat', 'Pulang'].map((s) => `<option>${s}</option>`).join('')}</select></div>
       </div>
 
       <div class="panel mt-4 overflow-hidden"><div class="overflow-x-auto"><table class="tbl" id="vt">
-        <thead><tr><th>Waktu</th><th>Pasien</th><th class="hidden md:table-cell">Layanan</th><th class="hidden lg:table-cell">Dokter</th><th>Status</th><th class="w-10"><span class="sr-only">Buka</span></th></tr></thead>
+        <thead><tr><th>Waktu</th><th>Pasien</th><th class="hidden md:table-cell">Layanan</th><th class="hidden lg:table-cell">Tenaga medis</th><th>Status</th><th class="w-10"><span class="sr-only">Buka</span></th></tr></thead>
         <tbody id="vbody"></tbody></table></div><div id="vpager"></div></div>`;
     },
     mount(root) {
       const user = App.auth.user();
-      const state = { tab: 'today', q: '', jenis: '', status: '', page: 1, mine: user.role === 'tenaga_medis' && user.profesi === 'Dokter' };
+      const state = { tab: 'today', q: '', jenis: '', status: '', page: 1, mine: false };
       const tbody = root.querySelector('#vbody');
       const pager = root.querySelector('#vpager');
       const todayStr = ui.toDateStr(new Date());
@@ -153,7 +153,7 @@
             <div data-ri class="hidden"><label class="label" for="ruang">Ruang rawat <span class="text-rose-700" aria-hidden="true">*</span></label><select id="ruang" class="field">${App.config.ruangRI.map((r) => `<option value="${esc(r.ruang)}">${esc(r.ruang)}, ${esc(r.kelas)}</option>`).join('')}</select></div>
             <div data-ri class="hidden"><label class="label" for="kamar">Nomor kamar / tempat tidur</label><input id="kamar" class="field ident" placeholder="Contoh: M-203"></div>
 
-            <div><label class="label" for="dokter"><span data-dokter-label>Dokter pemeriksa</span> <span class="text-rose-700" aria-hidden="true">*</span></label><select id="dokter" class="field"></select></div>
+            <div><label class="label" for="dokter"><span data-dokter-label>Tenaga medis pemeriksa</span> <span class="text-rose-700" aria-hidden="true">*</span></label><select id="dokter" class="field"></select></div>
             <div><label class="label" for="penjamin">Penjamin</label><select id="penjamin" class="field">${App.config.penjamin.map((x) => `<option>${esc(x)}</option>`).join('')}</select></div>
             <div class="sm:col-span-2"><label class="label" for="keluhan">Keluhan utama <span class="text-rose-700" aria-hidden="true">*</span></label><textarea id="keluhan" class="field" rows="2" placeholder="Contoh: demam 3 hari disertai batuk"></textarea><p class="err hidden" id="err-keluhan" role="alert"></p></div>
             <div id="vblock" class="sm:col-span-2" aria-live="polite"></div>
@@ -170,7 +170,7 @@
 
       function dokterOptions() {
         const jenis = form.jenis.value;
-        const all = store.dokter();
+        const all = store.tenagaMedis();
         let list = all;
         if (jenis === 'RJ') list = all.filter((d) => d.spesialis === $('poli').value);
         $('dokter').innerHTML = (list.length ? list : all).map((d) => `<option value="${d.id}">${esc(d.nama)}${d.spesialis ? ', ' + esc(d.spesialis) : ''}</option>`).join('');
@@ -193,7 +193,7 @@
         const ri = form.jenis.value === 'RI';
         root.querySelectorAll('[data-rj]').forEach((e) => e.classList.toggle('hidden', ri));
         root.querySelectorAll('[data-ri]').forEach((e) => e.classList.toggle('hidden', !ri));
-        root.querySelector('[data-dokter-label]').textContent = ri ? 'DPJP (dokter penanggung jawab)' : 'Dokter pemeriksa';
+        root.querySelector('[data-dokter-label]').textContent = ri ? 'Tenaga medis penanggung jawab (DPJP)' : 'Tenaga medis pemeriksa';
         dokterOptions();
         const c = conflict();
         $('vblock').innerHTML = c ? ui.alertBox('danger', c) : '';

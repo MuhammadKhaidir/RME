@@ -6,8 +6,7 @@
 
   const DEMO = [
     { u: 'admin', p: 'admin123', role: 'petugas_rme', note: 'Admin Sistem' },
-    { u: 'dokter', p: 'dokter123', role: 'tenaga_medis', profesi: 'dokter', note: 'dr. Andi Pratama, Poli Umum' },
-    { u: 'perawat', p: 'perawat123', role: 'tenaga_medis', profesi: 'perawat', note: 'Ns. Siti Aminah' },
+    { u: 'nakes', p: 'nakes123', role: 'tenaga_medis', note: 'dr. Andi Pratama, Poli Umum' },
   ];
 
   App.pages.login = {
@@ -59,7 +58,7 @@
               <ul class="mt-3 divide-y divide-ink-100 rounded-md border border-ink-200">
                 ${DEMO.map(
                   (d, i) => `<li><button type="button" data-demo="${i}" class="flex w-full items-center justify-between gap-3 px-3 py-2.5 text-left hover:bg-ink-50">
-                    <span class="min-w-0"><span class="block text-sm font-medium">${ui.esc(App.auth.ROLES[d.role].label)}${d.profesi ? ' (' + d.profesi + ')' : ''}</span><span class="block truncate text-xs text-ink-500">${ui.esc(d.note)}</span></span>
+                    <span class="min-w-0"><span class="block text-sm font-medium">${ui.esc(App.auth.ROLES[d.role].label)}</span><span class="block truncate text-xs text-ink-500">${ui.esc(d.note)}</span></span>
                     <span class="ident shrink-0 text-xs text-ink-500">${d.u}</span></button></li>`
                 ).join('')}
               </ul>
